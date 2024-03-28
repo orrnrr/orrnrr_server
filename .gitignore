@@ -415,3 +415,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# 보안 정보 숨기기
+Secrets/
