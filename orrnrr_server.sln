@@ -3,14 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34701.34
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TokenSourceProvider", "TokenSourceProvider\TokenSourceProvider.csproj", "{2EC49089-0D42-4462-B45E-DF42932147BB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TokenSourceProvider", "TokenSourceProvider\TokenSourceProvider.csproj", "{2EC49089-0D42-4462-B45E-DF42932147BB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "솔루션 항목", "솔루션 항목", "{0609799B-2247-4FAB-B0CA-E3D4DB6FD89C}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccessLib", "DataAccessLib\DataAccessLib.csproj", "{DBAA1FBA-FFE5-498B-A4C7-9F86A2D7AA5E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccessLib", "DataAccessLib\DataAccessLib.csproj", "{DBAA1FBA-FFE5-498B-A4C7-9F86A2D7AA5E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,7 +1,4 @@
 ﻿
-using Dapper;
-using Newtonsoft.Json;
-
 namespace TokenSourceProvider
 {
     internal class Program
