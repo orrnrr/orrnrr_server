@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccessLib.Models;
 
 public partial class OrrnrrContext : DbContext
 {
-    public OrrnrrContext()
-    {
-    }
+    private static OrrnrrContext? _instance;
 
-    public OrrnrrContext(DbContextOptions<OrrnrrContext> options)
-        : base(options)
-    {
-    }
+    public static OrrnrrContext Instance => _instance is null ? _instance = new OrrnrrContext() : _instance;
+
+    private OrrnrrContext() { }
 
     public virtual DbSet<Candlestick> Candlesticks { get; set; }
 
