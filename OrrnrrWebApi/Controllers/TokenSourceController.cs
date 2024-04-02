@@ -15,6 +15,7 @@ namespace OrrnrrWebApi.Controllers
         private OrrnrrContext OrrnrrContext { get => OrrnrrContext.Instance; }
 
         [HttpPost]
+        [Consumes("application/json")]
         public IActionResult CreateTokenSource([FromBody]CreateTokenSourceRequest request)
         {
             var newTokenSource = request.ToTokenSource();
@@ -22,7 +23,7 @@ namespace OrrnrrWebApi.Controllers
             OrrnrrContext.TokenSources.Add(newTokenSource);
             OrrnrrContext.SaveChanges();
 
-#error 반환 무엇으로 할 것인지 코드 작성 필요
+            return new CreatedResult("/tokensource", newTokenSource.ToInfoResponse())
         }
     }
 }
