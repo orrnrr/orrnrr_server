@@ -1,5 +1,6 @@
 ﻿using DataAccessLib.Models;
 using OrrnrrWebApi.Requests;
+using OrrnrrWebApi.Responses;
 
 namespace OrrnrrWebApi.Converts
 {
@@ -11,6 +12,15 @@ namespace OrrnrrWebApi.Converts
             {
                 RequestUrl = request.RequestUrl,
                 Name = request.Name
+            };
+        }
+
+        internal static TokenSourceResponse ToTokenSourceResponse(this TokenSource tokenSource)
+        {
+            return new TokenSourceResponse
+            {
+                Id = tokenSource.Id,
+                Name = tokenSource.Name
             };
         }
     }

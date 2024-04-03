@@ -23,7 +23,7 @@ namespace OrrnrrWebApi.Controllers
             OrrnrrContext.TokenSources.Add(newTokenSource);
             OrrnrrContext.SaveChanges();
 
-            return new CreatedResult("/tokensource", newTokenSource.ToInfoResponse())
+            return new CreatedResult("tokensource", newTokenSource.ToTokenSourceResponse());
         }
     }
 }
