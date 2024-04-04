@@ -1,6 +1,7 @@
 ﻿
 using DataAccessLib.Models;
 using Newtonsoft.Json;
+using TokenSourceProvider.DividendFactories;
 using TokenSourceProvider.JsonObjects;
 
 namespace TokenSourceProvider
@@ -8,9 +9,20 @@ namespace TokenSourceProvider
     internal class Program
     {
         internal static OrrnrrContext OrrnrrContext { get; } = OrrnrrContext.Instance;
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
-            await apiTest();
+            DividendProvider provider = DividendProvider.Instance;
+
+            IDividendFactory[] factories = new[]
+            {
+                new Pm10SeoulDividendFactory(),
+            };
+
+            provider.Factories.AddRange(factories);
+
+            provider.Run();
+
+            //await apiTest();
         }
 
         private static async Task apiTest()
