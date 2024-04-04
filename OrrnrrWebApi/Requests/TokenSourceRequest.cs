@@ -2,7 +2,7 @@
 
 namespace OrrnrrWebApi.Requests
 {
-    public class CreateTokenSourceRequest : ITokenSourceRequest
+    public class TokenSourceRequest
     {
         [JsonPropertyName("name")]
         public required string Name { get; init; }

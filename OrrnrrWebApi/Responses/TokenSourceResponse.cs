@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using DataAccessLib.Models;
+using System.Text.Json.Serialization;
 
 namespace OrrnrrWebApi.Responses
 {
@@ -8,5 +9,13 @@ namespace OrrnrrWebApi.Responses
         public int Id { get; init; }
         [JsonPropertyName("name")]
         public required string Name { get; init; }
+
+        internal static TokenSourceResponse From(TokenSource tokenSource)
+        {
+            return new TokenSourceResponse { 
+                Name = tokenSource.Name,
+                Id = tokenSource.Id,
+            };
+        }
     }
 }
