@@ -9,8 +9,9 @@ namespace TokenSourceProvider.DividendFactories
 {
     internal interface IDividendFactory
     {
+        int TokenSourceId { get; }
         bool IsPaused { get; }
 
-        TokenSource GetTokenSource();
+        DividendHistory CreateDividendHistory(DateOnly dividendDate);
     }
 }
