@@ -12,6 +12,6 @@ namespace TokenSourceProvider.DividendFactories
         int TokenSourceId { get; }
         bool IsPaused { get; }
 
-        DividendHistory CreateDividendHistory(DateOnly dividendDate);
+        DividendHistory? CreateDividendHistory(DateOnly dividendDate);
     }
 }

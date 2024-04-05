@@ -13,27 +13,34 @@ namespace OrrnrrWebApi.Controllers
     [ApiController]
     public class TokenSourceController
     {
-        private OrrnrrContext OrrnrrContext { get => OrrnrrContext.Instance; }
+        private OrrnrrContext OrrnrrContext { get => ContextManager.Instance.OrrnrrContext; }
 
-        //[HttpPost]
-        //[Consumes("application/json")]
-        //public IActionResult CreateTokenSource([FromBody]TokenSourceRequest request)
-        //{
-        //    var existsTokenSource = OrrnrrContext.TokenSources
-        //        .Where(x => x.Name.Equals(request.Name))
-        //        .FirstOrDefault();
+        [HttpPost]
+        [Consumes("application/json")]
+        public IActionResult CreateTokenSource([FromBody] TokenSourceRequest request)
+        {
+            Console.WriteLine($"request.Name = {request.Name}");
 
-        //    if (existsTokenSource is not null)
-        //    {
-        //        throw new ApiException(HttpStatusCode.Conflict, "같은 이름의 토큰소스가 이미 존재합니다.");
-        //    }
+            using (var context = OrrnrrContext)
+            {
+                var existsTokenSource = context.TokenSources
+                    .Where(x => x.Name.Equals(request.Name))
+                    .FirstOrDefault();
 
-        //    var newTokenSource = request.ToTokenSource();
+                if (existsTokenSource is not null)
+                {
+                    Console.WriteLine($"existsTokenSource.Id = {existsTokenSource.Id}");
+                    throw new ApiException(HttpStatusCode.Conflict, "같은 이름의 토큰소스가 이미 존재합니다.");
+                }
 
-        //    OrrnrrContext.TokenSources.Add(newTokenSource);
-        //    OrrnrrContext.SaveChanges();
+                var newTokenSource = request.ToTokenSource();
 
-        //    return new CreatedResult("tokensource", TokenSourceResponse.From(newTokenSource));
-        //}
+                context.TokenSources.Add(newTokenSource);
+                context.SaveChanges();
+
+                Console.WriteLine($"newTokenSource.Id = {newTokenSource.Id}");
+                return new CreatedResult("tokensource", TokenSourceResponse.From(newTokenSource));
+            }
+        }
     }
 }

@@ -417,4 +417,4 @@ $RECYCLE.BIN/
 *.lnk
 
 # 보안 정보 숨기기
-Secrets/
+appsettings.json

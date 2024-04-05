@@ -1,4 +1,5 @@
 
+using DataAccessLib.Models;
 using OrrnrrWebApi.Exceptions;
 
 namespace OrrnrrWebApi
@@ -7,6 +8,12 @@ namespace OrrnrrWebApi
     {
         public static void Main(string[] args)
         {
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", true, true)
+                .Build();
+
+            ContextManager.Instance.UseOrrnrrContext(config.GetConnectionString("orrnrr") ?? throw new ArgumentNullException("구성 파일에서 orrnrr 연결문자열을 찾을 수 없습니다."));
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.

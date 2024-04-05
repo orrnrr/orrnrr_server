@@ -6,7 +6,5 @@ namespace OrrnrrWebApi.Requests
     {
         [JsonPropertyName("name")]
         public required string Name { get; init; }
-        [JsonPropertyName("requestUrl")]
-        public required string RequestUrl { get; init; }
     }
 }

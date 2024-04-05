@@ -9,9 +9,9 @@ public partial class TokenSource
 
     public string Name { get; set; } = null!;
 
-    public string RequestUrl { get; set; } = null!;
+    //public string RequestUrl { get; set; } = null!;
 
-    public virtual ICollection<DividendHistory> DividendHistories { get; set; } = new List<DividendHistory>();
+    //public virtual ICollection<DividendHistory> DividendHistories { get; set; } = new List<DividendHistory>();
 
-    public virtual ICollection<Token> Tokens { get; set; } = new List<Token>();
+    //public virtual ICollection<Token> Tokens { get; set; } = new List<Token>();
 }
