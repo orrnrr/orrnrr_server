@@ -7,11 +7,15 @@ namespace DataAccessLib.Models;
 
 public partial class OrrnrrContext : DbContext
 {
-    private static OrrnrrContext? _instance;
+    private readonly string _connectionString;
 
-    public static OrrnrrContext Instance => _instance is null ? _instance = new OrrnrrContext() : _instance;
-
-    private OrrnrrContext() { }
+    internal OrrnrrContext(string connectionString) {
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            throw new ArgumentException("연결문자열은 null이거나 비어있을 수 없습니다.");
+        }
+        _connectionString = connectionString;
+    }
 
     public virtual DbSet<Candlestick> Candlesticks { get; set; }
 
@@ -34,7 +38,7 @@ public partial class OrrnrrContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseNpgsql(Secrets.SecretProvider.ORRNRR_CONNECTION_STRING);
+        => optionsBuilder.UseNpgsql(_connectionString);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,10 +48,10 @@ public partial class OrrnrrContext : DbContext
 
             entity.ToTable("candlestick");
 
-            entity.HasIndex(e => new { e.TokenId, e.BeginDate, e.CandlestickUnitId }, "unq_date_token_candlestickunit").IsUnique();
+            entity.HasIndex(e => new { e.TokenId, e.BeginDateTime, e.CandlestickUnitId }, "unq_date_token_candlestickunit").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.BeginDate).HasColumnName("begin_date");
+            entity.Property(e => e.BeginDateTime).HasColumnName("begin_datetime");
             entity.Property(e => e.BeginPrice).HasColumnName("begin_price");
             entity.Property(e => e.CandlestickUnitId).HasColumnName("candlestick_unit_id");
             entity.Property(e => e.EndPrice).HasColumnName("end_price");
@@ -56,11 +60,11 @@ public partial class OrrnrrContext : DbContext
             entity.Property(e => e.TokenId).HasColumnName("token_id");
             entity.Property(e => e.TransactionVolume).HasColumnName("transaction_volume");
 
-            entity.HasOne(d => d.CandlestickUnit).WithMany(p => p.Candlesticks)
+            entity.HasOne(d => d.CandlestickUnit).WithMany()
                 .HasForeignKey(d => d.CandlestickUnitId)
                 .HasConstraintName("fk_candlestick_unit");
 
-            entity.HasOne(d => d.Token).WithMany(p => p.Candlesticks)
+            entity.HasOne(d => d.Token).WithMany()
                 .HasForeignKey(d => d.TokenId)
                 .HasConstraintName("fk_token");
         });
@@ -92,7 +96,7 @@ public partial class OrrnrrContext : DbContext
             entity.Property(e => e.DividendPerUnit).HasColumnName("dividend_per_unit");
             entity.Property(e => e.TokenSourceId).HasColumnName("token_source_id");
 
-            entity.HasOne(d => d.TokenSource).WithMany(p => p.DividendHistories)
+            entity.HasOne(d => d.TokenSource).WithMany()
                 .HasForeignKey(d => d.TokenSourceId)
                 .HasConstraintName("fk_token_source");
         });
@@ -103,7 +107,7 @@ public partial class OrrnrrContext : DbContext
 
             entity.ToTable("dividend_receive_history");
 
-            entity.HasIndex(e => new { e.UserId, e.TokenId, e.ReceiveDate }, "unq_dividend_receive_history").IsUnique();
+            entity.HasIndex(e => new { e.UserId, e.TokenId, e.ReceiveDateTime }, "unq_dividend_receive_history").IsUnique();
 
             entity.Property(e => e.DividendAmount)
                 .ValueGeneratedNever()
@@ -111,15 +115,15 @@ public partial class OrrnrrContext : DbContext
             entity.Property(e => e.Id)
                 .ValueGeneratedOnAdd()
                 .HasColumnName("id");
-            entity.Property(e => e.ReceiveDate).HasColumnName("receive_date");
+            entity.Property(e => e.ReceiveDateTime).HasColumnName("receive_datetime");
             entity.Property(e => e.TokenId).HasColumnName("token_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
-            entity.HasOne(d => d.Token).WithMany(p => p.DividendReceiveHistories)
+            entity.HasOne(d => d.Token).WithMany()
                 .HasForeignKey(d => d.TokenId)
                 .HasConstraintName("fk_token");
 
-            entity.HasOne(d => d.User).WithMany(p => p.DividendReceiveHistories)
+            entity.HasOne(d => d.User).WithMany()
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("fk_user");
         });
@@ -141,7 +145,7 @@ public partial class OrrnrrContext : DbContext
                 .HasColumnName("name");
             entity.Property(e => e.TokenSourceId).HasColumnName("token_source_id");
 
-            entity.HasOne(d => d.TokenSource).WithMany(p => p.Tokens)
+            entity.HasOne(d => d.TokenSource).WithMany()
                 .HasForeignKey(d => d.TokenSourceId)
                 .HasConstraintName("fk_token_source");
         });
@@ -152,22 +156,22 @@ public partial class OrrnrrContext : DbContext
 
             entity.ToTable("token_holdings_history");
 
-            entity.HasIndex(e => new { e.UserId, e.TokenId, e.HoldDate }, "unq_token_holdings_history").IsUnique();
+            entity.HasIndex(e => new { e.UserId, e.TokenId, e.HoldDateTime }, "unq_token_holdings_history").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.AverageBuyPrice).HasColumnName("average_buy_price");
-            entity.Property(e => e.HoldDate).HasColumnName("hold_date");
+            entity.Property(e => e.HoldDateTime).HasColumnName("hold_datetime");
             entity.Property(e => e.MaxBuyPrice).HasColumnName("max_buy_price");
             entity.Property(e => e.MinBuyPrice).HasColumnName("min_buy_price");
             entity.Property(e => e.TokenCount).HasColumnName("token_count");
             entity.Property(e => e.TokenId).HasColumnName("token_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
-            entity.HasOne(d => d.Token).WithMany(p => p.TokenHoldingsHistories)
+            entity.HasOne(d => d.Token).WithMany()
                 .HasForeignKey(d => d.TokenId)
                 .HasConstraintName("fk_token");
 
-            entity.HasOne(d => d.User).WithMany(p => p.TokenHoldingsHistories)
+            entity.HasOne(d => d.User).WithMany()
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("fk_user");
         });
@@ -178,23 +182,23 @@ public partial class OrrnrrContext : DbContext
 
             entity.ToTable("token_order_history");
 
-            entity.HasIndex(e => new { e.UserId, e.TokenId, e.OrderDate }, "unq_token_order_history").IsUnique();
+            entity.HasIndex(e => new { e.UserId, e.TokenId, e.OrderDateTime }, "unq_token_order_history").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CompleteCount).HasColumnName("complete_count");
             entity.Property(e => e.IsBuyOrder).HasColumnName("is_buy_order");
             entity.Property(e => e.IsCanceled).HasColumnName("is_canceled");
             entity.Property(e => e.OrderCount).HasColumnName("order_count");
-            entity.Property(e => e.OrderDate).HasColumnName("order_date");
+            entity.Property(e => e.OrderDateTime).HasColumnName("order_datetime");
             entity.Property(e => e.OrderPrice).HasColumnName("order_price");
             entity.Property(e => e.TokenId).HasColumnName("token_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
-            entity.HasOne(d => d.Token).WithMany(p => p.TokenOrderHistories)
+            entity.HasOne(d => d.Token).WithMany()
                 .HasForeignKey(d => d.TokenId)
                 .HasConstraintName("fk_token");
 
-            entity.HasOne(d => d.User).WithMany(p => p.TokenOrderHistories)
+            entity.HasOne(d => d.User).WithMany()
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("fk_user");
         });
@@ -211,9 +215,6 @@ public partial class OrrnrrContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(200)
                 .HasColumnName("name");
-            entity.Property(e => e.RequestUrl)
-                .HasMaxLength(2000)
-                .HasColumnName("request_url");
         });
 
         modelBuilder.Entity<TransactionHistory>(entity =>
@@ -229,13 +230,13 @@ public partial class OrrnrrContext : DbContext
             entity.Property(e => e.IsBuyTransaction).HasColumnName("is_buy_transaction");
             entity.Property(e => e.SellOrderId).HasColumnName("sell_order_id");
             entity.Property(e => e.TransactionCount).HasColumnName("transaction_count");
-            entity.Property(e => e.TransactionDate).HasColumnName("transaction_date");
+            entity.Property(e => e.TransactionDateTime).HasColumnName("transaction_datetime");
 
-            entity.HasOne(d => d.BuyOrder).WithMany(p => p.TransactionHistoryBuyOrders)
+            entity.HasOne(d => d.BuyOrder).WithMany()
                 .HasForeignKey(d => d.BuyOrderId)
                 .HasConstraintName("fk_buy_order");
 
-            entity.HasOne(d => d.SellOrder).WithMany(p => p.TransactionHistorySellOrders)
+            entity.HasOne(d => d.SellOrder).WithMany()
                 .HasForeignKey(d => d.SellOrderId)
                 .HasConstraintName("fk_sell_order");
         });

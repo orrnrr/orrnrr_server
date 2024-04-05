@@ -13,7 +13,7 @@ public partial class DividendReceiveHistory
 
     public int DividendAmount { get; set; }
 
-    public DateOnly ReceiveDate { get; set; }
+    public DateTime ReceiveDateTime { get; set; }
 
     public virtual Token Token { get; set; } = null!;
 

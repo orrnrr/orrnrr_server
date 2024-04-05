@@ -15,7 +15,7 @@ public partial class TransactionHistory
 
     public bool IsBuyTransaction { get; set; }
 
-    public DateOnly TransactionDate { get; set; }
+    public DateTime TransactionDateTime { get; set; }
 
     public virtual TokenOrderHistory BuyOrder { get; set; } = null!;
 

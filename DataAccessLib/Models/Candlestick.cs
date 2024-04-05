@@ -21,7 +21,7 @@ public partial class Candlestick
 
     public int TransactionVolume { get; set; }
 
-    public DateOnly BeginDate { get; set; }
+    public DateTime BeginDateTime { get; set; }
 
     public virtual CandlestickUnit CandlestickUnit { get; set; } = null!;
 

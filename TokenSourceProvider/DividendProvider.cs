@@ -1,10 +1,4 @@
 ﻿using DataAccessLib.Models;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TokenSourceProvider.DividendFactories;
 
 namespace TokenSourceProvider
@@ -15,7 +9,8 @@ namespace TokenSourceProvider
         
         public static DividendProvider Instance { get => _instance is null ? _instance = new DividendProvider() : _instance; }
         public DividendFactoryCollection Factories { get; } = new DividendFactoryCollection();
-        private OrrnrrContext OrrnrrContext { get => OrrnrrContext.Instance; }
+        private OrrnrrContext OrrnrrContext { get => ContextManager.Instance.OrrnrrContext; }
+        
         
         private DividendProvider() { }
 
@@ -32,21 +27,29 @@ namespace TokenSourceProvider
 
             var needToDevidendTokenSourceIds = totalTokenSourceIds.Except(existsDividendTokenSourceIds);
 
-            var dividendHistories = from factory in Factories
-                        join id in needToDevidendTokenSourceIds on factory.TokenSourceId equals id
-                        where !factory.IsPaused
-                        select factory.CreateDividendHistory(yesterday);
+            var factories = from factory in Factories
+                            join id in needToDevidendTokenSourceIds on factory.TokenSourceId equals id
+                            where !factory.IsPaused
+                            select factory;
 
-            OrrnrrContext.DividendHistories.AddRange(dividendHistories);
-
-
-
-
-            foreach(var history in dividendHistories)
+            foreach (var factory in factories)
             {
-                Console.WriteLine(JsonConvert.SerializeObject(history));
-                Console.WriteLine();
+                try
+                {
+                    var history = factory.CreateDividendHistory(yesterday);
+                    if (history is null)
+                    {
+                        continue;
+                    }
+
+                    OrrnrrContext.DividendHistories.AddRange(history);
+                }catch
+                {
+                    continue;
+                }
             }
+
+            OrrnrrContext.SaveChanges();
         }
     }
 }

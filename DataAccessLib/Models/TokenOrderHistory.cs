@@ -19,15 +19,15 @@ public partial record TokenOrderHistory
 
     public int CompleteCount { get; set; }
 
-    public DateOnly OrderDate { get; set; }
+    public DateTime OrderDateTime { get; set; }
 
     public bool IsCanceled { get; set; }
 
     public virtual Token Token { get; set; } = null!;
 
-    public virtual ICollection<TransactionHistory> TransactionHistoryBuyOrders { get; set; } = new List<TransactionHistory>();
+    //public virtual ICollection<TransactionHistory> TransactionHistoryBuyOrders { get; set; } = new List<TransactionHistory>();
 
-    public virtual ICollection<TransactionHistory> TransactionHistorySellOrders { get; set; } = new List<TransactionHistory>();
+    //public virtual ICollection<TransactionHistory> TransactionHistorySellOrders { get; set; } = new List<TransactionHistory>();
 
     public virtual User User { get; set; } = null!;
 }

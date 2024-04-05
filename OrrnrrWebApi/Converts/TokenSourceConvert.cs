@@ -11,7 +11,6 @@ namespace OrrnrrWebApi.Converts
             return new TokenSource
             {
                 Name = request.Name,
-                RequestUrl = request.RequestUrl,
             };
         }
     }

@@ -9,5 +9,5 @@ public partial class CandlestickUnit
 
     public string Name { get; set; } = null!;
 
-    public virtual ICollection<Candlestick> Candlesticks { get; set; } = new List<Candlestick>();
+    //public virtual ICollection<Candlestick> Candlesticks { get; set; } = new List<Candlestick>();
 }

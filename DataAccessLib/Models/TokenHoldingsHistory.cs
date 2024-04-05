@@ -19,7 +19,7 @@ public partial class TokenHoldingsHistory
 
     public int MinBuyPrice { get; set; }
 
-    public DateOnly HoldDate { get; set; }
+    public DateTime HoldDateTime { get; set; }
 
     public virtual Token Token { get; set; } = null!;
 
