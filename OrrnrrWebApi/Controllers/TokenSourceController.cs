@@ -19,8 +19,6 @@ namespace OrrnrrWebApi.Controllers
         [Consumes("application/json")]
         public IActionResult CreateTokenSource([FromBody] TokenSourceRequest request)
         {
-            Console.WriteLine($"request.Name = {request.Name}");
-
             using (var context = OrrnrrContext)
             {
                 var existsTokenSource = context.TokenSources

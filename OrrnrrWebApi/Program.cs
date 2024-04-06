@@ -12,7 +12,7 @@ namespace OrrnrrWebApi
                 .AddJsonFile("appsettings.json", true, true)
                 .Build();
 
-            ContextManager.Instance.UseOrrnrrContext(config.GetConnectionString("orrnrr") ?? throw new ArgumentNullException("구성 파일에서 orrnrr 연결문자열을 찾을 수 없습니다."));
+            ContextManager.Instance.UseOrrnrrContext(config.GetConnectionString("orrnrr") ?? throw new ArgumentNullException(nameof(config), "구성 파일에서 orrnrr 연결문자열을 찾을 수 없습니다."));
 
             var builder = WebApplication.CreateBuilder(args);
 
