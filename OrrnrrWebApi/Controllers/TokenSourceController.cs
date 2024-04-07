@@ -1,5 +1,4 @@
 ﻿using DataAccessLib.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using OrrnrrWebApi.Converts;
 using OrrnrrWebApi.Exceptions;
@@ -11,7 +10,7 @@ namespace OrrnrrWebApi.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class TokenSourceController
+    public class TokenSourceController : Controller
     {
         private OrrnrrContext OrrnrrContext { get => ContextManager.Instance.OrrnrrContext; }
 
@@ -37,7 +36,8 @@ namespace OrrnrrWebApi.Controllers
                 context.SaveChanges();
 
                 Console.WriteLine($"newTokenSource.Id = {newTokenSource.Id}");
-                return new CreatedResult("tokensource", TokenSourceResponse.From(newTokenSource));
+                //return new CreatedResult("tokensource", TokenSourceResponse.From(newTokenSource));
+                return Created("/tokensource", TokenSourceResponse.From(newTokenSource));
             }
         }
     }
