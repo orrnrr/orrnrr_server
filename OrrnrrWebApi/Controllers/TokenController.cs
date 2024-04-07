@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using OrrnrrWebApi.Constants;
 using OrrnrrWebApi.Exceptions;
 using OrrnrrWebApi.Parameters;
 using OrrnrrWebApi.Responses;
@@ -20,30 +21,32 @@ namespace OrrnrrWebApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetTokenList([FromQuery] PagenationParameter pagination, [FromQuery]string? orderBy, [FromQuery]string? sorting)
+        public IActionResult GetTokenList([FromQuery] PagenationParameter pagination, [FromQuery]SortingParameter sortingParam)
         {
             pagination.ThrowIfNotValid();
 
-            if (string.IsNullOrEmpty(orderBy))
+            string sorting = sortingParam.GetSortingOrDefault();
+            if(!Sorting.Contains(sorting))
             {
-                TokenService.GetTokensOrderByTradeAmount();
+                throw new BadRequestApiException($"sorting의 값은 '{Sorting.ASC}', '{Sorting.DESC}' 외에 다른 값이 될 수 없습니다.");
             }
 
+            var comparer = sortingParam.GetComparerOrDefault<int>();
+
             IEnumerable<TokenResponse> response;
-            
-            switch (orderBy)
+            switch (sortingParam.GetOrderByOrDefault(OrderBy.TARDE_AMONT))
             {
-                case "TARDE_AMONT":
+                case OrderBy.TARDE_AMONT:
                     response = TokenService.GetTokensOrderByTradeAmount();
                     break;
-                case "CURRENT_PRICE":
+                case OrderBy.CURRENT_PRICE:
                     response = TokenService.GetTokensOrderByCurrentPrice();
                     break;
-                case "CHANGE_RATE":
+                case OrderBy.CHANGE_RATE:
                     response = TokenService.GetTokensOrderByChangeRate();
                     break;
                 default:
-                    throw new BadRequestApiException("orderBy의 값은 'TARDE_AMONT', 'CURRENT_PRICE', 'CHANGE_RATE' 외에 다른 값이 될 수 없습니다.");
+                    throw new BadRequestApiException($"orderBy의 값은 '{OrderBy.TARDE_AMONT}', '{OrderBy.CURRENT_PRICE}', '{OrderBy.CHANGE_RATE}' 외에 다른 값이 될 수 없습니다.");
             }
 
             return Ok(response);
