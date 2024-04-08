@@ -21,30 +21,42 @@ namespace OrrnrrWebApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetTokenList([FromQuery] PagenationParameter pagination, [FromQuery]SortingParameter sortingParam)
+        public IActionResult GetTokenList([FromQuery] PagenationParameter pagination, [FromQuery] SortingParameter sortingParam)
         {
             pagination.ThrowIfNotValid();
+            sortingParam.ThrowIfNotValid();
 
             string sorting = sortingParam.GetSortingOrDefault();
-            if(!Sorting.Contains(sorting))
+            if (!Sorting.Contains(sorting))
             {
                 throw new BadRequestApiException($"sorting의 값은 '{Sorting.ASC}', '{Sorting.DESC}' 외에 다른 값이 될 수 없습니다.");
             }
-
-            var comparer = sortingParam.GetComparerOrDefault<int>();
 
             IEnumerable<TokenResponse> response;
             switch (sortingParam.GetOrderByOrDefault(OrderBy.TARDE_AMONT))
             {
                 case OrderBy.TARDE_AMONT:
-                    response = TokenService.GetTokensOrderByTradeAmount();
-                    break;
+                    {
+                        var comparer = sortingParam.GetComparer<int>();
+                        if (comparer is null)
+                        {
+
+                        }
+                        response = TokenService.GetTokensOrderByTradeAmount(comparer);
+                        break;
+                    }
                 case OrderBy.CURRENT_PRICE:
-                    response = TokenService.GetTokensOrderByCurrentPrice();
-                    break;
+                    {
+                        var comparer = sortingParam.GetComparer<int>();
+                        response = TokenService.GetTokensOrderByCurrentPrice(comparer);
+                        break;
+                    }
                 case OrderBy.CHANGE_RATE:
-                    response = TokenService.GetTokensOrderByChangeRate();
-                    break;
+                    {
+                        var comparer = sortingParam.GetComparer<double>();
+                        response = TokenService.GetTokensOrderByChangeRate(comparer);
+                        break;
+                    }
                 default:
                     throw new BadRequestApiException($"orderBy의 값은 '{OrderBy.TARDE_AMONT}', '{OrderBy.CURRENT_PRICE}', '{OrderBy.CHANGE_RATE}' 외에 다른 값이 될 수 없습니다.");
             }
