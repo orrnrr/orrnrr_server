@@ -15,12 +15,12 @@ namespace OrrnrrWebApi.Parameters
         {
             if (Page < 1)
             {
-                throw new BadRequestApiException("page 값은 1 이상이어야 합니다.");
+                throw new BadRequestApiException("page의 값은 1이상이어야 합니다.");
             }
 
             if (Size < 1)
             {
-                throw new BadRequestApiException("size 값은 1이상이어야 합니다.");
+                throw new BadRequestApiException("size의 값은 1이상이어야 합니다.");
             }
         }
     }

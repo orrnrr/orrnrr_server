@@ -35,14 +35,5 @@ namespace OrrnrrWebApi.Parameters
         {
             return string.IsNullOrEmpty(Sorting) ? defulatSorting : Sorting!;
         }
-
-        internal void ThrowIfNotValid()
-        {
-            string sorting = GetSortingOrDefault();
-            if (!Constants.Sorting.Contains(sorting))
-            {
-                throw new BadRequestApiException($"sorting의 값은 '{Constants.Sorting.ASC}', '{Constants.Sorting.DESC}' 외에 다른 값이 될 수 없습니다.");
-            }
-        }
     }
 }
