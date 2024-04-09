@@ -1,4 +1,5 @@
 ﻿
+
 namespace OrrnrrWebApi.Sort
 {
     public static class OrderDirectionConsts
@@ -18,9 +19,9 @@ namespace OrrnrrWebApi.Sort
             }
         }
 
-        internal static OrderDirectionType ParseOrderByType(string orderDirection)
+        internal static OrderDirectionType GetOrderDirectionType(string orderDirectionStr)
         {
-            switch (orderDirection)
+            switch (orderDirectionStr)
             {
                 case ASC:
                     return OrderDirectionType.Ascending;
@@ -29,6 +30,23 @@ namespace OrrnrrWebApi.Sort
                 default:
                     return OrderDirectionType.None;
             }
+        }
+
+        /// <summary>
+        /// 주어진 문자열에 해당하는 OrderDirectionType을 반환합니다. 만약 주어진 문자열이 null이거나 빈 문자열이면 기본값으로 제공한 값을 반환합니다. 만약 주어진 문자열에 대응되는 값이 없다면 None을 반환합니다.
+        /// </summary>
+        /// <param name="orderDirectionStr"></param>
+        /// <param name="ascending"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        internal static OrderDirectionType GetOrderDirectionTypeOrDefault(string? orderDirectionStr, OrderDirectionType defaultOrderDirectionType = OrderDirectionType.Ascending)
+        {
+            if (string.IsNullOrEmpty(orderDirectionStr))
+            {
+                return defaultOrderDirectionType;
+            }
+
+            return GetOrderDirectionType(orderDirectionStr);
         }
     }
 }

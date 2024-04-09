@@ -6,30 +6,35 @@ namespace OrrnrrWebApi.Responses
 {
     public class TokenResponse
     {
-        private TokenResponse(int id, string name, int tokenSourceId, string description)
+        public TokenResponse(int id, string name, string description, int tokenSourceId, string tokenSourceName, int currentPrice, int previousPrice, int tradeAmount)
         {
             Id = id;
             Name = name;
-            TokenSourceId = tokenSourceId;
             Description = description;
+            TokenSourceId = tokenSourceId;
+            TokenSourceName = tokenSourceName;
+            CurrentPrice = currentPrice;
+            PreviousPrice = previousPrice;
+            TradeAmount = tradeAmount;
         }
+
+        public TokenResponse() { }
 
         [JsonPropertyName("id")]
-        public int Id { get; }
+        public required int Id { get; init; }
         [JsonPropertyName("name")]
-        public string Name { get; }
+        public required string Name { get; init; }
+        [JsonPropertyName("description")]
+        public required string Description { get; init; }
         [JsonPropertyName("tokenSourceId")]
-        public int TokenSourceId { get; }
-        public string Description { get; }
-
-        internal static TokenResponse From(Token token)
-        {
-            return new TokenResponse(
-                id: token.Id
-                , name: token.Name
-                , tokenSourceId: token.TokenSourceId
-                , description: token.Description
-            );
-        }
+        public required int TokenSourceId { get; init; }
+        [JsonPropertyName("tokenSourceName")]
+        public required string TokenSourceName { get; init; }
+        [JsonPropertyName("currentPrice")]
+        public int CurrentPrice { get; init; }
+        [JsonPropertyName("previousPrice")]
+        public int PreviousPrice { get; init; }
+        [JsonPropertyName("tradeAmount")]
+        public int TradeAmount { get; init; }
     }
 }

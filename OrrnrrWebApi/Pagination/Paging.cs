@@ -12,6 +12,8 @@ namespace OrrnrrWebApi.Pagination
         public int Page { get; }
         public int Size { get; }
 
+        public int Skip => (Page - 1) * Size;
+
         internal static Paging Of(int page, int size)
         {
             if (page < 1)
