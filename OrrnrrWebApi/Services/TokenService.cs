@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Internal;
 using OrrnrrWebApi.Pagination;
 using OrrnrrWebApi.Responses;
 using OrrnrrWebApi.Sort;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OrrnrrWebApi.Services
 {
@@ -58,6 +59,36 @@ namespace OrrnrrWebApi.Services
                 .ToArray();
 
             return PaginationResponse<TokenResponse>.Of(paging, data, total);
+        }
+
+        public Token CreateToken(int tokenSourceId, string name, string description)
+        {
+            var tokenSource = OrrnrrContext.TokenSources
+                .Where(x => x.Id == tokenSourceId)
+                .FirstOrDefault() ?? throw new ArgumentOutOfRangeException(nameof(tokenSourceId), tokenSourceId, $"존재하지 않는 토큰소스 아이디입니다.");
+
+            var existsToken = OrrnrrContext.Tokens.Where(x => x.Name == name).FirstOrDefault();
+            if (existsToken is not null)
+            {
+                throw new InvalidOperationException("이미 같은 이름의 토큰이 존재하여 토큰을 생성하지 못했습니다.");
+            }
+
+            var createdToken = new Token
+            {
+                Description = description,
+                Name = name,
+                TokenSource = tokenSource,
+            };
+
+            OrrnrrContext.Tokens.Add(createdToken);
+            OrrnrrContext.SaveChanges();
+
+            return createdToken;
+        }
+
+        public bool IsExistsTokenName(string name)
+        {
+            return OrrnrrContext.Tokens.Any(x => x.Name == name);
         }
     }
 }

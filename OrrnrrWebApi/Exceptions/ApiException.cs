@@ -5,12 +5,13 @@ namespace OrrnrrWebApi.Exceptions
 {
     public class ApiException : Exception
     {
-        public ApiException(HttpStatusCode statusCode, string message) : base(message)
+        public ApiException(HttpStatusCode statusCode, string message, string? code = null) : base(message)
         {
             StatusCode = statusCode;
+            Code = code;
         }
 
         public HttpStatusCode StatusCode { get; }
-        public ApiFailureResult Result { get => new ApiFailureResult { Message = Message }; }
+        public string? Code { get; }
     }
 }

@@ -10,7 +10,7 @@ namespace OrrnrrWebApi.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class TokenSourceController : Controller
+    public class TokenSourcesController : Controller
     {
         private OrrnrrContext OrrnrrContext { get => ContextManager.Instance.OrrnrrContext; }
 

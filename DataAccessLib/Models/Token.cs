@@ -5,15 +5,41 @@ namespace DataAccessLib.Models;
 
 public partial class Token
 {
-    public int Id { get; set; }
+    private string _name = null!;
+    private string _description = null!;
+    public int Id { get; init; }
 
-    public string Name { get; set; } = null!;
+    public required string Name
+    {
+        get => _name;
+        init
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentOutOfRangeException(nameof(Name), value, "토큰의 이름은 null이거나 비어있을 수 없습니다.");
+            }
 
-    public string Description { get; set; } = null!;
+            _name = value;
+        }
+    }
 
-    public int TokenSourceId { get; set; }
+    public required string Description
+    {
+        get => _description;
+        init
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentOutOfRangeException(nameof(Description), value, "토큰에 대한 설명은 null이거나 비어있을 수 없습니다.");
+            }
 
-    public virtual TokenSource TokenSource { get; set; } = null!;
+            _description = value;
+        }
+    }
+
+    public int TokenSourceId { get; init; }
+
+    public required virtual TokenSource TokenSource { get; init; }
 
     //public virtual ICollection<Candlestick> Candlesticks { get; set; } = new List<Candlestick>();
 

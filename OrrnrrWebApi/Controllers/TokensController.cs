@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using DataAccessLib.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using OrrnrrWebApi.Authorization;
 using OrrnrrWebApi.Exceptions;
 using OrrnrrWebApi.Pagination;
 using OrrnrrWebApi.Responses;
 using OrrnrrWebApi.Services;
 using OrrnrrWebApi.Sort;
+using OrrnrrWebApi.Utils;
 using System.ComponentModel.DataAnnotations;
 using System.Net.NetworkInformation;
 using System.Text.Json;
@@ -13,13 +16,49 @@ namespace OrrnrrWebApi.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class TokenController : Controller
+    public class TokensController : Controller
     {
         private ITokenService TokenService { get; }
+        private ITokenSourceService TokenSourceService { get; }
 
-        public TokenController(ITokenService tokenService)
+        public TokensController(ITokenService tokenService, ITokenSourceService tokenSourceService)
         {
             TokenService = tokenService;
+            TokenSourceService = tokenSourceService;
+        }
+
+        [HttpPost]
+        [RequireAccessToken(UserRoles.User)]
+        public IActionResult CreateToken([FromForm]int tokenSourceId, [FromForm][MaxLength(200)] string? name, [FromForm][MaxLength(2000)] string? description)
+        {
+            var identityName = AuthUtil.GetUserName();
+            Console.WriteLine($"User.Identity.Name = {identityName}");
+
+
+            if (!TokenSourceService.IsExistsById(tokenSourceId))
+            {
+                throw new BadRequestApiException("새로 생성될 토큰은 존재하지 않는 토큰소스를 참조할 수 없습니다.");
+            }
+
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new BadRequestApiException("토큰의 이름은 null이거나 비어있을 수 없습니다.");
+            }
+
+            bool isExistsTokenName = TokenService.IsExistsTokenName(name);
+            if (isExistsTokenName)
+            {
+                throw new ConflictApiException("이미 같은 이름의 토큰이 존재합니다.");
+            }
+
+            if (string.IsNullOrEmpty(description))
+            {
+                throw new BadRequestApiException("토큰에 대한 설명은 null이거나 비어있을 수 없습니다.");
+            }
+
+            var createdToken = TokenService.CreateToken(tokenSourceId, name, description);
+
+            return Created("/tokens", SimpleTokenResponse.From(createdToken));
         }
 
         [HttpGet]
