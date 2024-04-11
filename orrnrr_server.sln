@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "솔루션 항목", "솔루�
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccessLib", "DataAccessLib\DataAccessLib.csproj", "{DBAA1FBA-FFE5-498B-A4C7-9F86A2D7AA5E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrrnrrWebApi", "OrrnrrWebApi\OrrnrrWebApi.csproj", "{92A6839F-79D1-46A7-A7EE-7B6D05954886}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrrnrrWebApi", "OrrnrrWebApi\OrrnrrWebApi.csproj", "{92A6839F-79D1-46A7-A7EE-7B6D05954886}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

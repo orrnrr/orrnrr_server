@@ -9,35 +9,28 @@ using System.Text;
 
 namespace OrrnrrWebApi.Authorization
 {
-    internal class JwtProvider
+    public class JwtProvider
     {
-        private JwtProvider() { }
-
-        private static JwtProvider? _instance;
-        public static JwtProvider Instance { get => _instance ?? throw new InvalidOperationException($"{nameof(JwtProvider)}의 인스턴스가 초기화되지 않았습니다."); }
-        internal required SecurityKey SecurityKey { get; init; }
-        internal required JwtSecurityTokenHandler TokenHandler { get; init; }
-
-        internal static void CreateInstance(string secretKey)
+        public JwtProvider(string secretKeyStr)
         {
-            if (_instance is not null)
+            if (string.IsNullOrEmpty(secretKeyStr))
             {
-                return;
+                throw new ArgumentNullException(nameof(secretKeyStr));
             }
 
-            _instance = new JwtProvider
-            {
-                SecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey)),
-                TokenHandler = new JwtSecurityTokenHandler(),
-            };
+            SecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKeyStr));
+            TokenHandler = new JwtSecurityTokenHandler();
         }
 
-        internal string CreateAccessToken(int userId, UserRoles userRoles)
+        public SecurityKey SecurityKey { get; }
+        public JwtSecurityTokenHandler TokenHandler { get; }
+
+        public string CreateAccessToken(int userId, UserRoles userRoles)
         {
             var claimsIdentity = new ClaimsIdentity(new[]
             {
-                new Claim("UserId", userId.ToString()),
-                new Claim("UserRoles", ((int)userRoles).ToString()),
+                new Claim(AuthUtil.USER_ID_TYPE, userId.ToString()),
+                new Claim(AuthUtil.ROLES_TYPE, ((int)userRoles).ToString()),
             });
 
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -52,7 +45,7 @@ namespace OrrnrrWebApi.Authorization
             return TokenHandler.WriteToken(token);
         }
 
-        internal IPrincipal GetPrincipalFromAccessToken(string accessToken)
+        internal ClaimsPrincipal GetPrincipalFromAccessToken(string accessToken)
         {
             var tokenValidationParameters = new TokenValidationParameters
             {
@@ -63,7 +56,7 @@ namespace OrrnrrWebApi.Authorization
                 ClockSkew = TimeSpan.Zero,
             };
 
-            IPrincipal principal;
+            ClaimsPrincipal principal;
             SecurityToken securityToken;
 
             try

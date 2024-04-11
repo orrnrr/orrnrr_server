@@ -26,8 +26,7 @@ namespace OrrnrrWebApi.Controllers
 
                 if (existsTokenSource is not null)
                 {
-                    Console.WriteLine($"existsTokenSource.Id = {existsTokenSource.Id}");
-                    throw new ApiException(HttpStatusCode.Conflict, "같은 이름의 토큰소스가 이미 존재합니다.");
+                    throw new ConflictApiException("같은 이름의 토큰소스가 이미 존재합니다.");
                 }
 
                 var newTokenSource = request.ToTokenSource();
@@ -35,8 +34,6 @@ namespace OrrnrrWebApi.Controllers
                 context.TokenSources.Add(newTokenSource);
                 context.SaveChanges();
 
-                Console.WriteLine($"newTokenSource.Id = {newTokenSource.Id}");
-                //return new CreatedResult("tokensource", TokenSourceResponse.From(newTokenSource));
                 return Created("/tokensource", TokenSourceResponse.From(newTokenSource));
             }
         }

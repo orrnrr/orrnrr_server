@@ -12,12 +12,12 @@ namespace OrrnrrWebApi.Authorization
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     internal class RequireAccessTokenAttribute : Attribute, IAuthorizationFilter
     {
-        private UserRoles TargetUserRoles { get; }
-        private JwtProvider Provider { get; } = JwtProvider.Instance;
+        private UserRoles AllowedRoles { get; }
+        private JwtProvider Provider { get; } = AuthProviderManager.CreateJwtProvider();
 
-        internal RequireAccessTokenAttribute(UserRoles targetUserRoles)
+        internal RequireAccessTokenAttribute(UserRoles allowedRoles)
         {
-            TargetUserRoles = targetUserRoles;
+            AllowedRoles = allowedRoles;
         }
 
         public void OnAuthorization(AuthorizationFilterContext context)
@@ -33,7 +33,7 @@ namespace OrrnrrWebApi.Authorization
                 return;
             }
 
-            IPrincipal principal;
+            ClaimsPrincipal principal;
             try
             {
                 principal = Provider.GetPrincipalFromAccessToken(accessToken);
@@ -44,8 +44,15 @@ namespace OrrnrrWebApi.Authorization
                 return;
             }
 
-            Console.WriteLine(principal);
-            Thread.CurrentPrincipal = principal;
+            UserRoles matchedRoles = AllowedRoles & AuthUtil.GetUserRoles(principal);
+            if (matchedRoles == UserRoles.None)
+            {
+                context.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                context.Result = new ObjectResult(new ApiFailureResult { Message = "접근 권한이 없습니다." });
+                return;
+            }
+
+            context.HttpContext.User = principal;
         }
     }
 }

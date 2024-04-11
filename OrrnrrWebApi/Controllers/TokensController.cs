@@ -1,4 +1,5 @@
 ﻿using DataAccessLib.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using OrrnrrWebApi.Authorization;
@@ -9,6 +10,7 @@ using OrrnrrWebApi.Services;
 using OrrnrrWebApi.Sort;
 using OrrnrrWebApi.Utils;
 using System.ComponentModel.DataAnnotations;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Text.Json;
 
@@ -28,13 +30,9 @@ namespace OrrnrrWebApi.Controllers
         }
 
         [HttpPost]
-        [RequireAccessToken(UserRoles.User)]
+        //[RequireAccessToken(UserRoles.User | UserRoles.Manager)]
         public IActionResult CreateToken([FromForm]int tokenSourceId, [FromForm][MaxLength(200)] string? name, [FromForm][MaxLength(2000)] string? description)
         {
-            var identityName = AuthUtil.GetUserName();
-            Console.WriteLine($"User.Identity.Name = {identityName}");
-
-
             if (!TokenSourceService.IsExistsById(tokenSourceId))
             {
                 throw new BadRequestApiException("새로 생성될 토큰은 존재하지 않는 토큰소스를 참조할 수 없습니다.");
@@ -95,6 +93,7 @@ namespace OrrnrrWebApi.Controllers
                 OrderByType.전일대비변동률 => TokenService.GetTokensOrderByChangeRate(paging, ordering),
                 _ => throw new BadRequestApiException($"{nameof(orderBy)}의 값이 유효하지 않습니다."),
             };
+
             return Ok(response);
         }
     }
