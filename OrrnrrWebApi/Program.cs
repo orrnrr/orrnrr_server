@@ -14,12 +14,8 @@ namespace OrrnrrWebApi
 
             AuthProviderManager.SecretKey = builder.Configuration.GetValue<string>("SecretKey") ?? throw new ArgumentNullException("SecretKey");
             ContextManager.Instance.UseOrrnrrContext(builder.Configuration.GetConnectionString("orrnrr")?? throw new ArgumentNullException("orrnrr connectionString", "구성 파일에서 orrnrr 연결문자열을 찾을 수 없습니다."));
+
             // Add services to the container.
-
-            //var jwtprovider = AuthProviderManager.CreateJwtProvider();
-            //var token = jwtprovider.CreateAccessToken(1, UserRoles.User);
-            //Console.WriteLine(token);
-
             builder.Services.AddControllers(options =>
             {
                 // Action Filters

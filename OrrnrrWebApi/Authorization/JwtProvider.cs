@@ -25,7 +25,7 @@ namespace OrrnrrWebApi.Authorization
         public SecurityKey SecurityKey { get; }
         public JwtSecurityTokenHandler TokenHandler { get; }
 
-        public string CreateAccessToken(int userId, UserRoles userRoles)
+        public string CreateAccessToken(int userId, UserRoles userRoles, DateTime Expires)
         {
             var claimsIdentity = new ClaimsIdentity(new[]
             {
@@ -36,13 +36,26 @@ namespace OrrnrrWebApi.Authorization
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = claimsIdentity,
-                Expires = DateTime.UtcNow.AddHours(1),
+                Expires = Expires,
                 SigningCredentials = new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256),
             };
 
             var token = TokenHandler.CreateToken(tokenDescriptor);
 
             return TokenHandler.WriteToken(token);
+        }
+
+        internal string CreateSuperUserAccessToken()
+        {
+            return CreateAccessToken(1, UserRoles.User, DateTime.UtcNow.AddMonths(6));
+        }
+        internal string CreateSuperManagerAccessToken()
+        {
+            return CreateAccessToken(2, UserRoles.Manager, DateTime.UtcNow.AddMonths(6));
+        }
+        internal string CreateSuperDeveloperAccessToken()
+        {
+            return CreateAccessToken(3, UserRoles.Developer, DateTime.UtcNow.AddMonths(6));
         }
 
         internal ClaimsPrincipal GetPrincipalFromAccessToken(string accessToken)
