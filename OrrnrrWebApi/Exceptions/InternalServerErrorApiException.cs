@@ -2,10 +2,7 @@
 
 namespace OrrnrrWebApi.Exceptions
 {
-    public class InternalServerErrorApiException : ApiException
+    public class InternalServerErrorApiException(string message) : ApiException(HttpStatusCode.InternalServerError, message)
     {
-        public InternalServerErrorApiException(string message) : base(HttpStatusCode.InternalServerError, message)
-        {
-        }
     }
 }

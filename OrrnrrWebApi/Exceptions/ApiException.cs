@@ -3,15 +3,9 @@ using System.Net;
 
 namespace OrrnrrWebApi.Exceptions
 {
-    public class ApiException : Exception
+    public class ApiException(HttpStatusCode statusCode, string message, object? content = null) : Exception(message)
     {
-        public ApiException(HttpStatusCode statusCode, string message, string? code = null) : base(message)
-        {
-            StatusCode = statusCode;
-            Code = code;
-        }
-
-        public HttpStatusCode StatusCode { get; }
-        public string? Code { get; }
+        public HttpStatusCode StatusCode { get; } = statusCode;
+        public object? Content { get; } = content;
     }
 }

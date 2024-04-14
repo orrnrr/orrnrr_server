@@ -96,11 +96,5 @@ namespace OrrnrrWebApi.Controllers
 
             return Ok(response);
         }
-
-        [HttpPost("{id}/buy")]
-        public IActionResult BuyTokenAtLimitPrice(int id)
-        {
-
-        }
     }
 }

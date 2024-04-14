@@ -2,10 +2,7 @@
 
 namespace OrrnrrWebApi.Exceptions
 {
-    public class AuthorizationApiExeption : ApiException
+    public class AuthorizationApiExeption(HttpStatusCode statusCode, string message, string? code = null) : ApiException(statusCode, message, code)
     {
-        public AuthorizationApiExeption(HttpStatusCode statusCode, string message, string? code = null) : base(statusCode, message, code)
-        {
-        }
     }
 }

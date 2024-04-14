@@ -2,10 +2,7 @@
 
 namespace OrrnrrWebApi.Exceptions
 {
-    public class BadRequestApiException : ApiException
+    public class BadRequestApiException(string message) : ApiException(HttpStatusCode.BadRequest, message)
     {
-        public BadRequestApiException(string message) : base(HttpStatusCode.BadRequest, message)
-        {
-        }
     }
 }

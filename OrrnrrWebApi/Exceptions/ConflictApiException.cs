@@ -2,10 +2,7 @@
 
 namespace OrrnrrWebApi.Exceptions
 {
-    public class ConflictApiException : ApiException
+    public class ConflictApiException(string message) : ApiException(HttpStatusCode.Conflict, message)
     {
-        public ConflictApiException(string message) : base(HttpStatusCode.Conflict, message)
-        {
-        }
     }
 }
