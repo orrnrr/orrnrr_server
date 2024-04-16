@@ -90,5 +90,12 @@ namespace OrrnrrWebApi.Services
         {
             return OrrnrrContext.Tokens.Any(x => x.Name == name);
         }
+
+        public Token? GetTokenById(int tokenId)
+        {
+            return OrrnrrContext.Tokens
+                .Where(x => x.Id == tokenId)
+                .FirstOrDefault();
+        }
     }
 }

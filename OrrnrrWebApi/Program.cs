@@ -28,6 +28,7 @@ namespace OrrnrrWebApi
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<ITokenSourceService, TokenSourceService>();
+            builder.Services.AddScoped<IOrdersService, OrdersService>();
             //builder.Services.AddScoped<JwtProvider>();
 
             builder.Services.AddScoped(x => ContextManager.Instance.OrrnrrContext);
