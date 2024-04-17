@@ -30,7 +30,7 @@ namespace OrrnrrWebApi.Controllers
         }
 
         [HttpPost]
-        //[RequireAccessToken(UserRoles.User | UserRoles.Manager)]
+        [RequireAccessToken(UserRoles.Developer)]
         public IActionResult CreateToken([FromForm]int tokenSourceId, [FromForm][MaxLength(200)] string? name, [FromForm][MaxLength(2000)] string? description)
         {
             if (!TokenSourceService.IsExistsById(tokenSourceId))

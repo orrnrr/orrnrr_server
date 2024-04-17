@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using OrrnrrWebApi.Authorization;
 using OrrnrrWebApi.Exceptions;
 using OrrnrrWebApi.Requests;
+using OrrnrrWebApi.Responses;
 using OrrnrrWebApi.Services;
+using OrrnrrWebApi.Types;
+using OrrnrrWebApi.Utils;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -11,7 +14,7 @@ namespace OrrnrrWebApi.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class OrdersController : Controller
+    internal class OrdersController : Controller
     {
         private IOrdersService OrdersService { get; }
 
@@ -22,18 +25,46 @@ namespace OrrnrrWebApi.Controllers
 
         [HttpPost]
         [RequireAccessToken(UserRoles.User)]
-        public IActionResult CreateOrder([FromBody] CreateOrderRequest request)
+        public IActionResult CreateOrder([FromBody] int? tokenId, [FromBody] string? orderType, [FromBody] bool? isBuyOrder, [FromBody] int? price, [FromBody] int? count)
         {
-            request.ThrowIfNotValid();
+            var isValidOrderType = Enum.TryParse(orderType ?? throw new BadRequestApiException($"{nameof(orderType)}은 null일 수 없습니다."), true, out OrderType validOrderType);
+            if (!isValidOrderType)
+            {
+                throw OrderTypeExtensions.CreateValidRangeApiException(nameof(orderType));
+            }
 
-            TokenOrderHistory tokenOrderHistory = OrdersService.CreateOrder(
-                tokenId: request.TokenId ?? throw new BadRequestApiException("tokenId는 null일 수 없습니다.")
-                
-            );
+            if (validOrderType != OrderType.Market)
+            {
+                if ((price ?? throw new NullParameterApiException(nameof(price))) <= 0)
+                {
+                    throw new NonPositiveNumberApiException(nameof(price));
+                }
+            }
 
+            if ((count ?? throw new NonPositiveNumberApiException(nameof(count))) <= 0)
+            {
+                throw new NonPositiveNumberApiException(nameof(count));
+            }
 
+            TokenOrderHistory createdTokenOrderHistory = validOrderType switch
+            {
+                OrderType.Market => OrdersService.CreateMartetOrder(
+                        userId: AuthUtil.GetUserId(HttpContext.User)
+                        , tokenId: tokenId ?? throw new NullParameterApiException(nameof(tokenId))
+                        , isBuyOrder: isBuyOrder ?? throw new NullParameterApiException(nameof(isBuyOrder))
+                        , count: count.Value
+                    ),
+                OrderType.Limit => OrdersService.CreateLimitOrder(
+                        userId: AuthUtil.GetUserId(HttpContext.User)
+                        , tokenId: tokenId ?? throw new NullParameterApiException(nameof(tokenId))
+                        , isBuyOrder: isBuyOrder ?? throw new NullParameterApiException(nameof(isBuyOrder))
+                        , price: price!.Value
+                        , count: count.Value
+                    ),
+                _ => throw OrderTypeExtensions.CreateValidRangeApiException(nameof(orderType))
+            };
 
-            return Ok(JsonSerializer.Serialize(request));
+            return Created("/orders", TokenOrderHistoryResponse.From(createdTokenOrderHistory));
         }
     }
 }
