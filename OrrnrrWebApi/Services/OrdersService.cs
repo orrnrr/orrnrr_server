@@ -15,11 +15,6 @@ namespace OrrnrrWebApi.Services
             OrrnrrContext = context;
         }
 
-        public TokenOrderHistory CreateOrder(int userId, int tokenId, OrderType orderType, bool isBuyOrder, int? price, int? count)
-        {
-
-        }
-
         public TokenOrderHistory CreateLimitOrder(int userId, int tokenId, bool isBuyOrder, int price, int count)
         {
             using var transaction = OrrnrrContext.Database.BeginTransaction(System.Data.IsolationLevel.RepeatableRead);
@@ -39,12 +34,18 @@ namespace OrrnrrWebApi.Services
                 {
                     throw new BadRequestApiException("잔고가 충분하지 않습니다.");
                 }
-
-                user.Pay(payment);
             }
+
+            var existsOrders = OrrnrrContext.TokenOrderHistories
+                .Where(x => x.TokenId == tokenId)
+                .Where(x => x.OrderPrice == price)
+                .Where(x => x.CompleteCount < x.OrderCount)
+                .Where(x => x.IsBuyOrder != isBuyOrder)
+                .Where(x => !x.IsCanceled)
+                .OrderByDescending(x => x.OrderDateTime);
         }
 
-        public TokenOrderHistory CreateMartetOrder(int userId, int tokenId, bool isBuyOrder, int? count)
+        public TokenOrderHistory CreateMartetOrder(int userId, int tokenId, bool isBuyOrder, int count)
         {
             throw new NotImplementedException();
         }
