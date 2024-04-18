@@ -38,11 +38,15 @@ namespace OrrnrrWebApi.Services
 
             var existsOrders = OrrnrrContext.TokenOrderHistories
                 .Where(x => x.TokenId == tokenId)
-                .Where(x => x.OrderPrice == price)
                 .Where(x => x.CompleteCount < x.OrderCount)
+                .Where(x => x.OrderPrice >= price)
                 .Where(x => x.IsBuyOrder != isBuyOrder)
                 .Where(x => !x.IsCanceled)
-                .OrderByDescending(x => x.OrderDateTime);
+                .OrderByDescending(x => x.OrderPrice)
+                .ThenBy(x => x.OrderDateTime);
+
+            var existsOrders2 = OrrnrrContext.
+
         }
 
         public TokenOrderHistory CreateMartetOrder(int userId, int tokenId, bool isBuyOrder, int count)
