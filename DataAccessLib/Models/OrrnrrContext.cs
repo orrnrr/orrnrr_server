@@ -227,7 +227,7 @@ public partial class OrrnrrContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.BuyOrderId).HasColumnName("buy_order_id");
-            entity.Property(e => e.IsBuyTransaction).HasColumnName("is_buy_transaction");
+            entity.Property(e => e.TradeAction).HasColumnName("trade_action");
             entity.Property(e => e.SellOrderId).HasColumnName("sell_order_id");
             entity.Property(e => e.TransactionCount).HasColumnName("transaction_count");
             entity.Property(e => e.TransactionDateTime).HasColumnName("transaction_datetime");

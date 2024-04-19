@@ -1,6 +1,7 @@
 ﻿using DataAccessLib.Models;
 using Microsoft.EntityFrameworkCore;
 using OrrnrrWebApi.Exceptions;
+using OrrnrrWebApi.Repositories;
 using OrrnrrWebApi.Sort;
 using OrrnrrWebApi.Types;
 using System.Transactions;
@@ -36,17 +37,27 @@ namespace OrrnrrWebApi.Services
                 }
             }
 
-            var existsOrders = OrrnrrContext.TokenOrderHistories
-                .Where(x => x.TokenId == tokenId)
-                .Where(x => x.CompleteCount < x.OrderCount)
-                .Where(x => x.OrderPrice >= price)
-                .Where(x => x.IsBuyOrder != isBuyOrder)
-                .Where(x => !x.IsCanceled)
-                .OrderByDescending(x => x.OrderPrice)
-                .ThenBy(x => x.OrderDateTime);
+            var newOrder = TokenOrderHistory.Of(user, token, isBuyOrder, price, count);
 
-            var existsOrders2 = OrrnrrContext.
+            var existsOrders = OrrnrrContext.TokenOrderHistories.GetExecutableOrders(token, price, isBuyOrder);
+            foreach (var existsOrder in existsOrders)
+            {
+                if (newOrder.ExecutableCount == 0)
+                {
+                    break;
+                }
 
+                var newTrade = TransactionHistory.Sign(newOrder, existsOrder);
+                OrrnrrContext.TransactionHistories.Add(newTrade);
+                OrrnrrContext.SaveChanges();
+
+            }
+
+            OrrnrrContext.TokenOrderHistories.Add(newOrder);
+            OrrnrrContext.SaveChanges();
+            transaction.Commit();
+
+            return newOrder;
         }
 
         public TokenOrderHistory CreateMartetOrder(int userId, int tokenId, bool isBuyOrder, int count)

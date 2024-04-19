@@ -41,6 +41,17 @@ public partial class Token
 
     public required virtual TokenSource TokenSource { get; init; }
 
+    public override bool Equals(object? obj)
+    {
+        return obj is Token token &&
+               Id == token.Id;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Id);
+    }
+
     //public virtual ICollection<Candlestick> Candlesticks { get; set; } = new List<Candlestick>();
 
     //public virtual ICollection<DividendReceiveHistory> DividendReceiveHistories { get; set; } = new List<DividendReceiveHistory>();
@@ -48,4 +59,6 @@ public partial class Token
     //public virtual ICollection<TokenHoldingsHistory> TokenHoldingsHistories { get; set; } = new List<TokenHoldingsHistory>();
 
     //public virtual ICollection<TokenOrderHistory> TokenOrderHistories { get; set; } = new List<TokenOrderHistory>();
+
+
 }
