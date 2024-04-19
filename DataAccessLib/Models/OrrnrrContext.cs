@@ -9,7 +9,7 @@ public partial class OrrnrrContext : DbContext
 {
     private readonly string _connectionString;
 
-    internal OrrnrrContext(string connectionString) {
+    public OrrnrrContext(string connectionString) {
         if (string.IsNullOrEmpty(connectionString))
         {
             throw new ArgumentException("연결문자열은 null이거나 비어있을 수 없습니다.");

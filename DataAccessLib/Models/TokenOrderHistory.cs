@@ -5,8 +5,12 @@ namespace DataAccessLib.Models;
 
 public partial record TokenOrderHistory
 {
+    public TokenOrderHistory() { }
+    
     public TokenOrderHistory(User user, Token token, bool isBuyOrder, int price, int count)
     {
+        UserId = user.Id;
+        TokenId = token.Id;
         User = user;
         Token = token;
         IsBuyOrder = isBuyOrder;

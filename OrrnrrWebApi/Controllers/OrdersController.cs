@@ -12,9 +12,9 @@ using System.Text.Json.Serialization;
 
 namespace OrrnrrWebApi.Controllers
 {
-    [Route("[controller]")]
     [ApiController]
-    internal class OrdersController : Controller
+    [Route("[controller]")]
+    public class OrdersController : Controller
     {
         private IOrdersService OrdersService { get; }
 
@@ -25,7 +25,8 @@ namespace OrrnrrWebApi.Controllers
 
         [HttpPost]
         [RequireAccessToken(UserRoles.User)]
-        public IActionResult CreateOrder([FromBody] int? tokenId, [FromBody] string? orderType, [FromBody] bool? isBuyOrder, [FromBody] int? price, [FromBody] int? count)
+        [Consumes("application/x-www-form-urlencoded")]
+        public IActionResult CreateOrder([FromForm] int? tokenId, [FromForm] string? orderType, [FromForm] bool? isBuyOrder, [FromForm] int? price, [FromForm] int? count)
         {
             var isValidOrderType = Enum.TryParse(orderType ?? throw new BadRequestApiException($"{nameof(orderType)}은 null일 수 없습니다."), true, out OrderType validOrderType);
             if (!isValidOrderType)
@@ -48,7 +49,7 @@ namespace OrrnrrWebApi.Controllers
 
             TokenOrderHistory createdTokenOrderHistory = validOrderType switch
             {
-                OrderType.Market => OrdersService.CreateMartetOrder(
+                OrderType.Market => OrdersService.CreateMarketOrder(
                         userId: AuthUtil.GetUserId(HttpContext.User)
                         , tokenId: tokenId ?? throw new NullParameterApiException(nameof(tokenId))
                         , isBuyOrder: isBuyOrder ?? throw new NullParameterApiException(nameof(isBuyOrder))

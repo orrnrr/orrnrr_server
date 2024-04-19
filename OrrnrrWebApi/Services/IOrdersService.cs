@@ -3,7 +3,7 @@ using OrrnrrWebApi.Types;
 
 namespace OrrnrrWebApi.Services
 {
-    internal interface IOrdersService
+    public interface IOrdersService
     {
         /// <summary>
         /// 지정가 주문내역을 생성합니다.
@@ -23,6 +23,6 @@ namespace OrrnrrWebApi.Services
         /// <param name="isBuyOrder"></param>
         /// <param name="count"></param>
         /// <returns></returns>
-        TokenOrderHistory CreateMartetOrder(int userId, int tokenId, bool isBuyOrder, int count);
+        TokenOrderHistory CreateMarketOrder(int userId, int tokenId, bool isBuyOrder, int count);
     }
 }

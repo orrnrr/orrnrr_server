@@ -78,17 +78,17 @@ namespace OrrnrrWebApi.Authorization
             }
             catch (SecurityTokenExpiredException)
             {
-                throw new AuthorizationApiExeption(System.Net.HttpStatusCode.Unauthorized, "토큰이 만료되었습니다.", "EXPIRED_TOKEN");
+                throw new AuthorizationApiExeption("토큰이 만료되었습니다.", "EXPIRED_TOKEN");
             }
             catch (Exception e)
             {
-                throw new AuthorizationApiExeption(System.Net.HttpStatusCode.Unauthorized, e.Message);
+                throw new AuthorizationApiExeption(e.Message);
             }
 
             var jwtSecurityToken = securityToken as JwtSecurityToken;
             if (jwtSecurityToken is null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             {
-                throw new AuthorizationApiExeption(System.Net.HttpStatusCode.Unauthorized, "액세스 토큰이 유효하지 않습니다.");
+                throw new AuthorizationApiExeption("액세스 토큰이 유효하지 않습니다.");
             }
 
             return principal;

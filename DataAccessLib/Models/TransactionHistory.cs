@@ -7,6 +7,7 @@ namespace DataAccessLib.Models;
 
 public partial class TransactionHistory
 {
+    public TransactionHistory() { }
     public TransactionHistory(TokenOrderHistory buyOrder, TokenOrderHistory sellOrder, TradeActionType tradeActionType, int transactionCount)
         : this(buyOrder.Id, sellOrder.Id, buyOrder, sellOrder, tradeActionType, transactionCount)
     {

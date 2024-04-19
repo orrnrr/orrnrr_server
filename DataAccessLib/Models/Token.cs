@@ -7,6 +7,9 @@ public partial class Token
 {
     private string _name = null!;
     private string _description = null!;
+
+    public Token() { }
+    
     public int Id { get; init; }
 
     public required string Name

@@ -5,6 +5,7 @@ namespace DataAccessLib.Models;
 
 public partial class TokenHoldingsHistory
 {
+    public TokenHoldingsHistory() { }
     public int Id { get; set; }
 
     public int UserId { get; set; }

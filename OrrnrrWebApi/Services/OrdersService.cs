@@ -60,7 +60,7 @@ namespace OrrnrrWebApi.Services
             return newOrder;
         }
 
-        public TokenOrderHistory CreateMartetOrder(int userId, int tokenId, bool isBuyOrder, int count)
+        public TokenOrderHistory CreateMarketOrder(int userId, int tokenId, bool isBuyOrder, int count)
         {
             throw new NotImplementedException();
         }

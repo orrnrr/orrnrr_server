@@ -5,6 +5,7 @@ namespace DataAccessLib.Models;
 
 public partial class Candlestick
 {
+    public Candlestick() { }
     public int Id { get; set; }
 
     public int CandlestickUnitId { get; set; }

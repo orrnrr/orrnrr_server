@@ -5,6 +5,8 @@ namespace DataAccessLib.Models;
 
 public partial class DividendHistory
 {
+    public DividendHistory() { }
+
     public int Id { get; init; }
 
     public int TokenSourceId { get; init; }
@@ -15,7 +17,6 @@ public partial class DividendHistory
 
     public virtual TokenSource TokenSource { get; init; } = null!;
 
-    private DividendHistory() { }
 
     public static DividendHistory Of(int tokenSourceId, int dividendPerUnit, DateOnly dividendDate)
     {

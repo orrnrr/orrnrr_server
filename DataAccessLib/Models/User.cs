@@ -5,6 +5,7 @@ namespace DataAccessLib.Models;
 
 public partial class User
 {
+    public User() { }
     public int Id { get; set; }
 
     public string Name { get; set; } = null!;
