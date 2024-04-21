@@ -18,6 +18,11 @@ namespace OrrnrrWebApi.Services
 
         public TokenOrderHistory CreateLimitOrder(int userId, int tokenId, bool isBuyOrder, int price, int count)
         {
+            return isBuyOrder switch
+            {
+                true => CreateLimitBuyOrder(userId, tokenId, price, count),
+                false => CreateLimitSellOrder(userId, tokenId, price, count),
+            };
             using var transaction = OrrnrrContext.Database.BeginTransaction(System.Data.IsolationLevel.RepeatableRead);
 
             var token = OrrnrrContext.Tokens
