@@ -36,6 +36,27 @@ namespace OrrnrrWebApi.Services
                     throw new BadRequestApiException("잔고가 충분하지 않습니다.");
                 }
             }
+            else
+            {
+                int numberOwned = OrrnrrContext.TokenHoldingsHistories
+                    .Where(x => x.UserId == userId)
+                    .Where(x => x.TokenId == tokenId)
+                    .Select(x => x.TokenCount)
+                    .FirstOrDefault();
+
+                var numberSell = OrrnrrContext.TokenOrderHistories
+                    .Where(x => x.UserId == userId)
+                    .Where(x => x.TokenId == tokenId)
+                    .Where(x => !x.IsBuyOrder)
+                    .Where(x => x.OrderCount > x.CompleteCount)
+                    .Where(x => !x.IsCanceled)
+                    .Sum(x => x.OrderCount - x.CompleteCount);
+
+                if (numberOwned < numberSell)
+                {
+                    throw new BadRequestApiException("소유한 토큰 개수가 충분하지 않습니다.");
+                }
+            }
 
             var newOrder = TokenOrderHistory.Of(user, token, isBuyOrder, price, count);
 
@@ -50,7 +71,6 @@ namespace OrrnrrWebApi.Services
                 var newTrade = TransactionHistory.Sign(newOrder, existsOrder);
                 OrrnrrContext.TransactionHistories.Add(newTrade);
                 OrrnrrContext.SaveChanges();
-
             }
 
             OrrnrrContext.TokenOrderHistories.Add(newOrder);
