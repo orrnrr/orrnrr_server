@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace DataAccessLib.Models;
 
-public partial record TokenOrderHistory
+public partial class TokenOrderHistory
 {
     public TokenOrderHistory() { }
     
@@ -39,11 +39,12 @@ public partial record TokenOrderHistory
 
     public virtual Token Token { get; set; } = null!;
 
+    public virtual User User { get; set; } = null!;
+
     //public virtual ICollection<TransactionHistory> TransactionHistoryBuyOrders { get; set; } = new List<TransactionHistory>();
 
     //public virtual ICollection<TransactionHistory> TransactionHistorySellOrders { get; set; } = new List<TransactionHistory>();
 
-    public virtual User User { get; set; } = null!;
     public int ExecutableCount { get => OrderCount - CompleteCount; }
 
     public static TokenOrderHistory CreateSellOrder(User user, Token token, int price, int count)
@@ -54,11 +55,6 @@ public partial record TokenOrderHistory
     public static TokenOrderHistory CreateBuyOrder(User user, Token token, int price, int count)
     {
         return new TokenOrderHistory(user, token, true, price, count);
-    }
-
-    public static TokenOrderHistory Of(User user, Token token, bool isBuyOrder, int price, int count)
-    {
-        return new TokenOrderHistory(user, token, isBuyOrder, price, count);
     }
 
     public (int, TradeActionType) Sign(TokenOrderHistory other)

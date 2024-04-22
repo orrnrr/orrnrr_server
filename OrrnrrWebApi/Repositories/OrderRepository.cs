@@ -24,7 +24,7 @@ namespace OrrnrrWebApi.Repositories
         public static IEnumerable<TokenOrderHistory> GetCanBuyOrders(this DbSet<TokenOrderHistory> orders, Token token, int price)
         {
             return orders
-                .Where(x => x.TokenId == token.Id)
+                .Where(x => x.Token == token)
                 .Where(x => x.OrderCount > x.CompleteCount)
                 .Where(x => !x.IsBuyOrder)
                 .Where(x => !x.IsCanceled)

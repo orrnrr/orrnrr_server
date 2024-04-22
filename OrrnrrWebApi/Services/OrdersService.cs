@@ -5,6 +5,7 @@ using OrrnrrWebApi.Exceptions;
 using OrrnrrWebApi.Repositories;
 using OrrnrrWebApi.Sort;
 using OrrnrrWebApi.Types;
+using System.Text.Json;
 using System.Transactions;
 
 namespace OrrnrrWebApi.Services
@@ -24,7 +25,6 @@ namespace OrrnrrWebApi.Services
                 true => CreateLimitBuyOrder(userId, tokenId, price, count),
                 false => CreateLimitSellOrder(userId, tokenId, price, count),
             };
-
         }
 
         private TokenOrderHistory CreateLimitSellOrder(int userId, int tokenId, int price, int count)
@@ -113,12 +113,15 @@ namespace OrrnrrWebApi.Services
             var newOrder = TokenOrderHistory.CreateBuyOrder(user, token, price, count);
 
             var existsOrders = OrrnrrContext.TokenOrderHistories.GetCanBuyOrders(token, price);
+
             foreach (var existsOrder in existsOrders)
             {
                 if (newOrder.ExecutableCount == 0)
                 {
                     break;
                 }
+
+                Console.WriteLine(JsonSerializer.Serialize(existsOrder));
 
                 (int transactionCount, TradeActionType tradeActionType) = newOrder.Sign(existsOrder);
 

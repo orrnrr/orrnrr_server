@@ -27,11 +27,12 @@ public partial class TransactionHistory
     public int SellOrderId { get; set; }
 
     public byte TradeActionId { get; set; }
+
     public int TransactionCount { get; set; }
 
     public DateTime TransactionDateTime { get; set; } = DateTime.UtcNow;
 
-    public TradeAction TradeAction { get; set; } = null!;
+    public virtual TradeAction TradeAction { get; set; } = null!;
 
     public virtual TokenOrderHistory BuyOrder { get; set; } = null!;
 

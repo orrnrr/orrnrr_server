@@ -49,6 +49,10 @@ namespace OrrnrrWebApi.Authorization
         {
             return CreateAccessToken(1, UserRoles.User, DateTime.UtcNow.AddMonths(6));
         }
+        internal string CreateSecondSuperUserAccessToken()
+        {
+            return CreateAccessToken(4, UserRoles.User, DateTime.UtcNow.AddMonths(6));
+        }
         internal string CreateSuperManagerAccessToken()
         {
             return CreateAccessToken(2, UserRoles.Manager, DateTime.UtcNow.AddMonths(6));

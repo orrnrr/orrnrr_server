@@ -106,18 +106,14 @@ public partial class OrrnrrContext : DbContext
 
         modelBuilder.Entity<DividendReceiveHistory>(entity =>
         {
-            entity.HasKey(e => e.DividendAmount).HasName("dividend_receive_history_pkey");
+            entity.HasKey(e => e.Id).HasName("dividend_receive_history_pkey");
 
             entity.ToTable("dividend_receive_history");
 
             entity.HasIndex(e => new { e.UserId, e.TokenId, e.ReceiveDateTime }, "unq_dividend_receive_history").IsUnique();
 
-            entity.Property(e => e.DividendAmount)
-                .ValueGeneratedNever()
-                .HasColumnName("dividend_amount");
-            entity.Property(e => e.Id)
-                .ValueGeneratedOnAdd()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.DividendAmount).HasColumnName("dividend_amount");
             entity.Property(e => e.ReceiveDateTime).HasColumnName("receive_datetime");
             entity.Property(e => e.TokenId).HasColumnName("token_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
@@ -244,7 +240,7 @@ public partial class OrrnrrContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.BuyOrderId).HasColumnName("buy_order_id");
-            entity.Property(e => e.TradeAction).HasColumnName("trade_action_id");
+            entity.Property(e => e.TradeActionId).HasColumnName("trade_action_id");
             entity.Property(e => e.SellOrderId).HasColumnName("sell_order_id");
             entity.Property(e => e.TransactionCount).HasColumnName("transaction_count");
             entity.Property(e => e.TransactionDateTime).HasColumnName("transaction_datetime");
@@ -266,7 +262,7 @@ public partial class OrrnrrContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("user_pkey");
 
-            entity.ToTable("user");
+            entity.ToTable("users");
 
             entity.HasIndex(e => e.Name, "unq_username").IsUnique();
 
