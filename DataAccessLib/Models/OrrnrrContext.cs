@@ -9,7 +9,8 @@ public partial class OrrnrrContext : DbContext
 {
     private readonly string _connectionString;
 
-    public OrrnrrContext(string connectionString) {
+    public OrrnrrContext(string connectionString)
+    {
         if (string.IsNullOrEmpty(connectionString))
         {
             throw new ArgumentException("연결문자열은 null이거나 비어있을 수 없습니다.");
@@ -32,6 +33,8 @@ public partial class OrrnrrContext : DbContext
     public virtual DbSet<TokenOrderHistory> TokenOrderHistories { get; set; }
 
     public virtual DbSet<TokenSource> TokenSources { get; set; }
+
+    public virtual DbSet<TradeAction> TradeActions { get; set; }
 
     public virtual DbSet<TransactionHistory> TransactionHistories { get; set; }
 
@@ -217,6 +220,20 @@ public partial class OrrnrrContext : DbContext
                 .HasColumnName("name");
         });
 
+        modelBuilder.Entity<TradeAction>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("trade_action_pkey");
+
+            entity.ToTable("trade_action");
+
+            entity.HasIndex(e => e.Name, "unq_action_name").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .HasColumnName("name");
+        });
+
         modelBuilder.Entity<TransactionHistory>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("transaction_history_pkey");
@@ -227,7 +244,7 @@ public partial class OrrnrrContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.BuyOrderId).HasColumnName("buy_order_id");
-            entity.Property(e => e.TradeAction).HasColumnName("trade_action");
+            entity.Property(e => e.TradeAction).HasColumnName("trade_action_id");
             entity.Property(e => e.SellOrderId).HasColumnName("sell_order_id");
             entity.Property(e => e.TransactionCount).HasColumnName("transaction_count");
             entity.Property(e => e.TransactionDateTime).HasColumnName("transaction_datetime");
@@ -239,6 +256,10 @@ public partial class OrrnrrContext : DbContext
             entity.HasOne(d => d.SellOrder).WithMany()
                 .HasForeignKey(d => d.SellOrderId)
                 .HasConstraintName("fk_sell_order");
+
+            entity.HasOne(d => d.TradeAction).WithMany()
+                .HasForeignKey(d => d.TradeActionId)
+                .HasConstraintName("fk_trade_action");
         });
 
         modelBuilder.Entity<User>(entity =>

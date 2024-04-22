@@ -1,4 +1,5 @@
 ﻿using DataAccessLib.Models;
+using DataAccessLib.Types;
 using Microsoft.EntityFrameworkCore;
 using OrrnrrWebApi.Exceptions;
 using OrrnrrWebApi.Repositories;
@@ -23,49 +24,43 @@ namespace OrrnrrWebApi.Services
                 true => CreateLimitBuyOrder(userId, tokenId, price, count),
                 false => CreateLimitSellOrder(userId, tokenId, price, count),
             };
-            using var transaction = OrrnrrContext.Database.BeginTransaction(System.Data.IsolationLevel.RepeatableRead);
 
+        }
+
+        private TokenOrderHistory CreateLimitSellOrder(int userId, int tokenId, int price, int count)
+        {
             var token = OrrnrrContext.Tokens
                 .Where(x => x.Id == tokenId)
                 .FirstOrDefault() ?? throw new BadRequestApiException("존재하지 않는 토큰은 주문할 수 없습니다.");
 
+            using var transaction = OrrnrrContext.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
+            
             var user = OrrnrrContext.Users
                 .Where(x => x.Id == userId)
                 .FirstOrDefault() ?? throw new BadRequestApiException("존재하지 않는 유저입니다.");
 
-            if (isBuyOrder)
-            {
-                int payment = price * count;
-                if (!user.CanPay(payment))
-                {
-                    throw new BadRequestApiException("잔고가 충분하지 않습니다.");
-                }
-            }
-            else
-            {
-                int numberOwned = OrrnrrContext.TokenHoldingsHistories
-                    .Where(x => x.UserId == userId)
-                    .Where(x => x.TokenId == tokenId)
-                    .Select(x => x.TokenCount)
-                    .FirstOrDefault();
+            int numberOwned = OrrnrrContext.TokenHoldingsHistories
+                .Where(x => x.UserId == userId)
+                .Where(x => x.TokenId == tokenId)
+                .Select(x => x.TokenCount)
+                .FirstOrDefault();
 
-                var numberSell = OrrnrrContext.TokenOrderHistories
-                    .Where(x => x.UserId == userId)
-                    .Where(x => x.TokenId == tokenId)
-                    .Where(x => !x.IsBuyOrder)
-                    .Where(x => x.OrderCount > x.CompleteCount)
-                    .Where(x => !x.IsCanceled)
-                    .Sum(x => x.OrderCount - x.CompleteCount);
+            var numberSell = OrrnrrContext.TokenOrderHistories
+                .Where(x => x.UserId == userId)
+                .Where(x => x.TokenId == tokenId)
+                .Where(x => !x.IsBuyOrder)
+                .Where(x => x.OrderCount > x.CompleteCount)
+                .Where(x => !x.IsCanceled)
+                .Sum(x => x.OrderCount - x.CompleteCount);
 
-                if (numberOwned < numberSell)
-                {
-                    throw new BadRequestApiException("소유한 토큰 개수가 충분하지 않습니다.");
-                }
+            if (numberOwned < numberSell + count)
+            {
+                throw new BadRequestApiException("소유한 토큰 개수가 충분하지 않습니다.");
             }
 
-            var newOrder = TokenOrderHistory.Of(user, token, isBuyOrder, price, count);
+            var newOrder = TokenOrderHistory.CreateSellOrder(user, token, price, count);
 
-            var existsOrders = OrrnrrContext.TokenOrderHistories.GetExecutableOrders(token, price, isBuyOrder);
+            var existsOrders = OrrnrrContext.TokenOrderHistories.GetCanSellOrders(token, price);
             foreach (var existsOrder in existsOrders)
             {
                 if (newOrder.ExecutableCount == 0)
@@ -73,9 +68,66 @@ namespace OrrnrrWebApi.Services
                     break;
                 }
 
-                var newTrade = TransactionHistory.Sign(newOrder, existsOrder);
+                (int transactionCount, TradeActionType tradeActionType) = newOrder.Sign(existsOrder);
+
+                var tradeAction = OrrnrrContext.TradeActions
+                    .Where(x => x.Name == tradeActionType.GetActionName())
+                    .First();
+
+                var newTrade = new TransactionHistory(existsOrder, newOrder, tradeAction, transactionCount);
                 OrrnrrContext.TransactionHistories.Add(newTrade);
-                OrrnrrContext.SaveChanges();
+            }
+
+            OrrnrrContext.TokenOrderHistories.Add(newOrder);
+            OrrnrrContext.SaveChanges();
+            transaction.Commit();
+
+            return newOrder;
+        }
+
+        private TokenOrderHistory CreateLimitBuyOrder(int userId, int tokenId, int price, int count)
+        {
+            var token = OrrnrrContext.Tokens
+                .Where(x => x.Id == tokenId)
+                .FirstOrDefault() ?? throw new BadRequestApiException("존재하지 않는 토큰은 주문할 수 없습니다.");
+
+            using var transaction = OrrnrrContext.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
+
+            var user = OrrnrrContext.Users
+                .Where(x => x.Id == userId)
+                .FirstOrDefault() ?? throw new BadRequestApiException("존재하지 않는 유저입니다.");
+
+            int existsBuyPayment = OrrnrrContext.TokenOrderHistories
+                .Where(x => x.User == user)
+                .Where(x => x.Token == token)
+                .Where(x => !x.IsCanceled)
+                .Where(x => x.IsBuyOrder)
+                .Where(x => x.OrderCount > x.CompleteCount)
+                .Sum(x => x.OrderPrice * (x.OrderCount - x.CompleteCount));
+
+            if (!user.CanPay(existsBuyPayment + price * count))
+            {
+                throw new BadRequestApiException("잔고가 충분하지 않습니다.");
+            }
+
+            var newOrder = TokenOrderHistory.CreateBuyOrder(user, token, price, count);
+
+            var existsOrders = OrrnrrContext.TokenOrderHistories.GetCanBuyOrders(token, price);
+            foreach (var existsOrder in existsOrders)
+            {
+                if (newOrder.ExecutableCount == 0)
+                {
+                    break;
+                }
+
+                (int transactionCount, TradeActionType tradeActionType) = newOrder.Sign(existsOrder);
+
+                var tradeAction = OrrnrrContext.TradeActions
+                    .Where(x => x.Name == tradeActionType.GetActionName())
+                    .First();
+
+                var newTrade = new TransactionHistory(newOrder, existsOrder, tradeAction, transactionCount);
+                OrrnrrContext.TransactionHistories.Add(newTrade);
             }
 
             OrrnrrContext.TokenOrderHistories.Add(newOrder);

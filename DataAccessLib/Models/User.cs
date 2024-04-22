@@ -17,15 +17,15 @@ public partial class User
         return Balance >= payment;
     }
 
-    public bool Pay (int payment)
+    internal void PayTo(User other, int payment)
     {
-        if (!CanPay(payment))
-        {
-            return false;
-        }
-
         Balance -= payment;
-        return true;
+        other.Balance += payment;
+
+        if (Balance < 0)
+        {
+            throw new InvalidOperationException("소지금 이상의 금액을 지불할 수 없습니다.");
+        }
     }
 
     //public virtual ICollection<DividendReceiveHistory> DividendReceiveHistories { get; set; } = new List<DividendReceiveHistory>();

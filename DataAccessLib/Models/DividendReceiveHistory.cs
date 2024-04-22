@@ -14,7 +14,7 @@ public partial class DividendReceiveHistory
 
     public int DividendAmount { get; set; }
 
-    public DateTime ReceiveDateTime { get; set; }
+    public DateTime ReceiveDateTime { get; set; } = DateTime.UtcNow;
 
     public virtual Token Token { get; set; } = null!;
 

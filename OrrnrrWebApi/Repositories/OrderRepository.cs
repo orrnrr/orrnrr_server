@@ -20,5 +20,29 @@ namespace OrrnrrWebApi.Repositories
                 .OrderByDescending(x => x.OrderPrice)
                 .ThenBy(x => x.OrderDateTime);
         }
+
+        public static IEnumerable<TokenOrderHistory> GetCanBuyOrders(this DbSet<TokenOrderHistory> orders, Token token, int price)
+        {
+            return orders
+                .Where(x => x.TokenId == token.Id)
+                .Where(x => x.OrderCount > x.CompleteCount)
+                .Where(x => !x.IsBuyOrder)
+                .Where(x => !x.IsCanceled)
+                .Where(x => x.OrderPrice <= price)
+                .OrderBy(x => x.OrderPrice)
+                .ThenBy(x => x.OrderDateTime);
+        }
+
+        public static IEnumerable<TokenOrderHistory> GetCanSellOrders(this DbSet<TokenOrderHistory> orders, Token token, int price)
+        {
+            return orders
+                .Where(x => x.TokenId == token.Id)
+                .Where(x => x.OrderCount > x.CompleteCount)
+                .Where(x => x.IsBuyOrder)
+                .Where(x => !x.IsCanceled)
+                .Where(x => x.OrderPrice >= price)
+                .OrderByDescending(x => x.OrderPrice)
+                .ThenBy(x => x.OrderDateTime);
+        }
     }
 }

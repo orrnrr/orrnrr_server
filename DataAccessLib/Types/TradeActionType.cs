@@ -9,8 +9,22 @@ namespace DataAccessLib.Types
     public enum TradeActionType : byte
     {
         None = 0,
-        Buy = 1,
-        Sell = 2,
-        Hold = 3,
+        매수 = 1,
+        매도 = 2,
+        보합 = 3,
+    }
+
+    public static class TradeActionTypeExtensions
+    {
+        public static string GetActionName(this TradeActionType tradeActionType)
+        {
+            return tradeActionType switch
+            {
+                TradeActionType.매수 => "매수",
+                TradeActionType.매도 => "매도",
+                TradeActionType.보합 => "보합",
+                _ => throw new InvalidOperationException("tradeActionType의 값이 유효하지 않습니다.")
+            };
+        }
     }
 }
