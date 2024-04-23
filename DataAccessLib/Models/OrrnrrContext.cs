@@ -244,6 +244,7 @@ public partial class OrrnrrContext : DbContext
             entity.Property(e => e.SellOrderId).HasColumnName("sell_order_id");
             entity.Property(e => e.TransactionCount).HasColumnName("transaction_count");
             entity.Property(e => e.TransactionDateTime).HasColumnName("transaction_datetime");
+            entity.Property(e => e.SignedPrice).HasColumnName("signed_price");
 
             entity.HasOne(d => d.BuyOrder).WithMany()
                 .HasForeignKey(d => d.BuyOrderId)

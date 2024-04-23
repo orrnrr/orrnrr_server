@@ -57,7 +57,7 @@ public partial class TokenOrderHistory
         return new TokenOrderHistory(user, token, true, price, count);
     }
 
-    public (int, TradeActionType) Sign(TokenOrderHistory other)
+    public (int, TradeActionType) Sign(TokenOrderHistory other, int signedPrice)
     {
         if (IsCanceled || other.IsCanceled)
         {
@@ -66,13 +66,13 @@ public partial class TokenOrderHistory
 
         return (this.IsBuyOrder, other.IsBuyOrder) switch
         {
-            (true, false) => this.Buy(other),
-            (false, true) => other.Buy(this),
+            (true, false) => this.Buy(other, signedPrice),
+            (false, true) => other.Buy(this, signedPrice),
             _ => throw new InvalidOperationException("거래를 성사시킬 수 없습니다. 두 주문 모두 매수주문이거나 매도주문입니다.")
         };
     }
 
-    private (int, TradeActionType) Buy(TokenOrderHistory other)
+    private (int, TradeActionType) Buy(TokenOrderHistory other, int signedPrice)
     {
         int tradeCount = Math.Min(ExecutableCount, other.ExecutableCount);
         if (tradeCount <= 0)
@@ -83,7 +83,7 @@ public partial class TokenOrderHistory
         CompleteCount += tradeCount;
         other.CompleteCount += tradeCount;
 
-        int payment = OrderPrice * tradeCount;
+        int payment = signedPrice * tradeCount;
 
         this.User.PayTo(other.User, payment);
 

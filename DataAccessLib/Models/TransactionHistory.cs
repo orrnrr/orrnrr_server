@@ -9,7 +9,7 @@ public partial class TransactionHistory
 {
     public TransactionHistory() { }
 
-    public TransactionHistory(TokenOrderHistory buyOrder, TokenOrderHistory sellOrder, TradeAction tradeAction, int transactionCount)
+    public TransactionHistory(TokenOrderHistory buyOrder, TokenOrderHistory sellOrder, TradeAction tradeAction, int transactionCount, int signedPrice)
     {
         BuyOrderId = buyOrder.Id;
         SellOrderId = sellOrder.Id;
@@ -18,6 +18,7 @@ public partial class TransactionHistory
         SellOrder = sellOrder;
         TradeAction = tradeAction;
         TransactionCount = transactionCount;
+        SignedPrice = signedPrice;
     }
 
     public int Id { get; set; }
@@ -29,6 +30,8 @@ public partial class TransactionHistory
     public byte TradeActionId { get; set; }
 
     public int TransactionCount { get; set; }
+
+    public int SignedPrice { get; set; }
 
     public DateTime TransactionDateTime { get; set; } = DateTime.UtcNow;
 

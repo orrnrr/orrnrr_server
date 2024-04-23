@@ -29,6 +29,7 @@ namespace OrrnrrWebApi.Repositories
                 .Where(x => !x.IsBuyOrder)
                 .Where(x => !x.IsCanceled)
                 .Where(x => x.OrderPrice <= price)
+                .Include(x => x.User)
                 .OrderBy(x => x.OrderPrice)
                 .ThenBy(x => x.OrderDateTime);
         }
@@ -41,6 +42,7 @@ namespace OrrnrrWebApi.Repositories
                 .Where(x => x.IsBuyOrder)
                 .Where(x => !x.IsCanceled)
                 .Where(x => x.OrderPrice >= price)
+                .Include(x => x.User)
                 .OrderByDescending(x => x.OrderPrice)
                 .ThenBy(x => x.OrderDateTime);
         }

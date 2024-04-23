@@ -60,7 +60,7 @@ namespace OrrnrrWebApi.Services
 
             var newOrder = TokenOrderHistory.CreateSellOrder(user, token, price, count);
 
-            var existsOrders = OrrnrrContext.TokenOrderHistories.GetCanSellOrders(token, price);
+            var existsOrders = OrrnrrContext.TokenOrderHistories.GetCanSellOrders(token, price).ToArray();
             foreach (var existsOrder in existsOrders)
             {
                 if (newOrder.ExecutableCount == 0)
@@ -68,13 +68,15 @@ namespace OrrnrrWebApi.Services
                     break;
                 }
 
-                (int transactionCount, TradeActionType tradeActionType) = newOrder.Sign(existsOrder);
+                int signedPrice = existsOrder.OrderPrice;
+
+                (int transactionCount, TradeActionType tradeActionType) = newOrder.Sign(existsOrder, signedPrice);
 
                 var tradeAction = OrrnrrContext.TradeActions
                     .Where(x => x.Name == tradeActionType.GetActionName())
                     .First();
 
-                var newTrade = new TransactionHistory(existsOrder, newOrder, tradeAction, transactionCount);
+                var newTrade = new TransactionHistory(existsOrder, newOrder, tradeAction, transactionCount, signedPrice);
                 OrrnrrContext.TransactionHistories.Add(newTrade);
             }
 
@@ -112,7 +114,7 @@ namespace OrrnrrWebApi.Services
 
             var newOrder = TokenOrderHistory.CreateBuyOrder(user, token, price, count);
 
-            var existsOrders = OrrnrrContext.TokenOrderHistories.GetCanBuyOrders(token, price);
+            var existsOrders = OrrnrrContext.TokenOrderHistories.GetCanBuyOrders(token, price).ToArray();
 
             foreach (var existsOrder in existsOrders)
             {
@@ -121,15 +123,14 @@ namespace OrrnrrWebApi.Services
                     break;
                 }
 
-                Console.WriteLine(JsonSerializer.Serialize(existsOrder));
-
-                (int transactionCount, TradeActionType tradeActionType) = newOrder.Sign(existsOrder);
+                int signedPrice = existsOrder.OrderPrice;
+                (int transactionCount, TradeActionType tradeActionType) = newOrder.Sign(existsOrder, signedPrice);
 
                 var tradeAction = OrrnrrContext.TradeActions
                     .Where(x => x.Name == tradeActionType.GetActionName())
                     .First();
 
-                var newTrade = new TransactionHistory(newOrder, existsOrder, tradeAction, transactionCount);
+                var newTrade = new TransactionHistory(newOrder, existsOrder, tradeAction, transactionCount, signedPrice);
                 OrrnrrContext.TransactionHistories.Add(newTrade);
             }
 
