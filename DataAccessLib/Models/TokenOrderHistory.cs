@@ -8,7 +8,7 @@ public partial class TokenOrderHistory
 {
     public TokenOrderHistory() { }
     
-    public TokenOrderHistory(User user, Token token, bool isBuyOrder, int price, int count)
+    public TokenOrderHistory(User user, Token token, bool isBuyOrder, int count, int? price = null)
     {
         UserId = user.Id;
         TokenId = token.Id;
@@ -27,7 +27,7 @@ public partial class TokenOrderHistory
 
     public bool IsBuyOrder { get; set; }
 
-    public int OrderPrice { get; set; }
+    public int? OrderPrice { get; set; } = null!;
 
     public int OrderCount { get; set; }
 
@@ -49,12 +49,12 @@ public partial class TokenOrderHistory
 
     public static TokenOrderHistory CreateSellOrder(User user, Token token, int price, int count)
     {
-        return new TokenOrderHistory(user, token, false, price, count);
+        return new TokenOrderHistory(user, token, false, count, price);
     }
 
     public static TokenOrderHistory CreateBuyOrder(User user, Token token, int price, int count)
     {
-        return new TokenOrderHistory(user, token, true, price, count);
+        return new TokenOrderHistory(user, token, true, count, price);
     }
 
     public (int, TradeActionType) Sign(TokenOrderHistory other, int signedPrice)

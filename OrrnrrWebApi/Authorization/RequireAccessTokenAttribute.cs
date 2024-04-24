@@ -37,7 +37,7 @@ namespace OrrnrrWebApi.Authorization
             try
             {
                 principal = Provider.GetPrincipalFromAccessToken(accessToken);
-            } catch (AuthorizationApiExeption e)
+            } catch (UnauthorizedApiExeption e)
             {
                 context.HttpContext.Response.StatusCode = (int)e.StatusCode;
                 context.Result = new ObjectResult(e.GetApiFailureResult());

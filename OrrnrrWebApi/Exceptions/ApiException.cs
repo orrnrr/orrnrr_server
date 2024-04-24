@@ -9,7 +9,7 @@ namespace OrrnrrWebApi.Exceptions
         public object? Content { get; } = content;
     }
 
-    public class AuthorizationApiExeption(string message, string? code = null)
+    public class UnauthorizedApiExeption(string message, string? code = null)
         : ApiException(HttpStatusCode.Unauthorized, message, code)
     {
     }
@@ -37,6 +37,11 @@ namespace OrrnrrWebApi.Exceptions
     public class NullParameterApiException(string paramName, object? content = null)
         : ApiException(HttpStatusCode.BadRequest, $"{paramName}의 값은 null일 수 없습니다.", content)
     { 
+    }
+
+    public class NotFoundApiException(string message, object? content = null)
+        : ApiException(HttpStatusCode.NotFound, message, content)
+    {
     }
 
     internal static class ExceptionExtentions

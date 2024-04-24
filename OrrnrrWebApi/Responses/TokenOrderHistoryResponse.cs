@@ -10,7 +10,7 @@ namespace OrrnrrWebApi.Responses
         {
         }
 
-        private TokenOrderHistoryResponse(int id, int orderPrice, int completeCount, DateTime orderDateTime)
+        private TokenOrderHistoryResponse(int id, int? orderPrice, int completeCount, DateTime orderDateTime)
         {
             Id = id;
             OrderPrice = orderPrice;
@@ -25,7 +25,7 @@ namespace OrrnrrWebApi.Responses
         [JsonPropertyName("id")]
         public int Id { get; }
         [JsonPropertyName("orderPrice")]
-        public int OrderPrice { get; }
+        public int? OrderPrice { get; }
         [JsonPropertyName("completeCount")]
         public int CompleteCount { get; }
         [JsonPropertyName("orderDate")]

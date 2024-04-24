@@ -1,4 +1,5 @@
 ﻿using DataAccessLib.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using OrrnrrWebApi.Pagination;
 using OrrnrrWebApi.Responses;
@@ -33,7 +34,7 @@ namespace OrrnrrWebApi.Services
 
             var query = from token in OrrnrrContext.Tokens
                         join tokenSource in OrrnrrContext.TokenSources on token.TokenSourceId equals tokenSource.Id
-                        join order in OrrnrrContext.TokenOrderHistories.Where(x => x.CompleteCount > 0) on token.Id equals order.TokenId into orderGroup
+                        join trade in OrrnrrContext.TransactionHistories.Include(x => x.BuyOrder) on token.Id equals trade.BuyOrder.TokenId into orderGroup
                         select new TokenResponse
                         {
                             Id = token.Id,
@@ -41,9 +42,9 @@ namespace OrrnrrWebApi.Services
                             Description = token.Description,
                             TokenSourceId = token.TokenSourceId,
                             TokenSourceName = tokenSource.Name,
-                            CurrentPrice = orderGroup.OrderByDescending(x => x.OrderDateTime).Select(x => x.OrderPrice).DefaultIfEmpty().FirstOrDefault(0),
-                            PreviousPrice = orderGroup.Where(x => x.OrderDateTime < today).OrderByDescending(x => x.OrderDateTime).Select(x => x.OrderPrice).DefaultIfEmpty().FirstOrDefault(0),
-                            TradeAmount = orderGroup.Where(x => x.OrderDateTime >= today).DefaultIfEmpty().Sum(x => x != null ? x.OrderPrice * x.CompleteCount : 0)
+                            CurrentPrice = orderGroup.OrderByDescending(x => x.TransactionDateTime).Select(x => x.SignedPrice).DefaultIfEmpty().FirstOrDefault(0),
+                            PreviousPrice = orderGroup.Where(x => x.TransactionDateTime < today).OrderByDescending(x => x.TransactionDateTime).Select(x => x.SignedPrice).DefaultIfEmpty().FirstOrDefault(0),
+                            TradeAmount = orderGroup.Where(x => x.TransactionDateTime >= today).DefaultIfEmpty().Sum(x => x != null ? x.SignedPrice * x.TransactionCount : 0)
                         };
 
             query = ordering.OrderDirection == OrderDirectionType.Descending ?
