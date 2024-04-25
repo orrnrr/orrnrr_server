@@ -17,10 +17,14 @@ namespace OrrnrrWebApi.Controllers
     public class OrdersController : Controller
     {
         private IOrdersService OrdersService { get; }
+        private ITokenService TokenService { get; }
+        private IUserService UserService { get; }
 
-        public OrdersController(IOrdersService ordersService)
+        public OrdersController(IOrdersService ordersService, ITokenService tokenService, IUserService userService)
         {
-            OrdersService = ordersService ?? throw new ArgumentNullException(nameof(ordersService));
+            OrdersService = ordersService;
+            TokenService = tokenService;
+            UserService = userService;
         }
 
         [HttpPost]

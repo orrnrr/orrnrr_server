@@ -18,8 +18,8 @@ namespace OrrnrrWebApi.Services
         /// <summary>
         /// 시장가 주문내역을 생성합니다.
         /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="tokenId"></param>
+        /// <param name="user"></param>
+        /// <param name="token"></param>
         /// <param name="isBuyOrder"></param>
         /// <param name="count"></param>
         /// <returns></returns>

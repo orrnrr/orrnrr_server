@@ -64,20 +64,15 @@ public partial class TokenOrderHistory
             throw new InvalidOperationException("거래를 성사시킬 수 없습니다. 취소된 주문이 포함되어 있습니다.");
         }
 
-        return (this.IsBuyOrder, other.IsBuyOrder) switch
+        if (IsBuyOrder == other.IsBuyOrder)
         {
-            (true, false) => this.Buy(other, signedPrice),
-            (false, true) => other.Buy(this, signedPrice),
-            _ => throw new InvalidOperationException("거래를 성사시킬 수 없습니다. 두 주문 모두 매수주문이거나 매도주문입니다.")
-        };
-    }
+            throw new InvalidOperationException("거래를 성사시킬 수 없습니다. 두 주문 모두 매수주문이거나 매도주문입니다.");
+        }
 
-    private (int, TradeActionType) Buy(TokenOrderHistory other, int signedPrice)
-    {
         int tradeCount = Math.Min(ExecutableCount, other.ExecutableCount);
         if (tradeCount <= 0)
         {
-            throw new InvalidOperationException("거래를 성사시킬 수 없습니다. 두 주문의 거래가능 수량이 0 이하입니다.");
+            throw new InvalidOperationException("거래를 성사시킬 수 없습니다. 두 주문의 거래가능수량이 0 이하입니다.");
         }
 
         CompleteCount += tradeCount;
@@ -85,15 +80,18 @@ public partial class TokenOrderHistory
 
         int payment = signedPrice * tradeCount;
 
-        this.User.PayTo(other.User, payment);
+        var buyOrder = IsBuyOrder ? this : other;
+        var sellOrder = IsBuyOrder ? other : this;
+
+        buyOrder.User.PayTo(sellOrder.User, payment);
 
         if (ExecutableCount > 0 && other.ExecutableCount > 0)
         {
-            throw new InvalidOperationException("거래를 성공적으로 성사시키지 못했습니다.");
+            throw new InvalidOperationException("거래를 성공적으로 성사시키지 못했습니다. 두 주문 모두 거래가능수량이 남아있습니다.");
         }
 
-        TradeActionType tradeActionType = this.ExecutableCount > 0 ? TradeActionType.매수 :
-            other.ExecutableCount > 0 ? TradeActionType.매도 :
+        TradeActionType tradeActionType = buyOrder.ExecutableCount > 0 ? TradeActionType.매수 :
+            sellOrder.ExecutableCount > 0 ? TradeActionType.매도 :
             TradeActionType.보합;
 
         return (tradeCount, tradeActionType);

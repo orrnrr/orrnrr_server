@@ -3,19 +3,17 @@ using DataAccessLib.Types;
 using Microsoft.EntityFrameworkCore;
 using OrrnrrWebApi.Exceptions;
 using OrrnrrWebApi.Repositories;
-using OrrnrrWebApi.Sort;
-using OrrnrrWebApi.Types;
-using System.Text.Json;
-using System.Transactions;
 
 namespace OrrnrrWebApi.Services
 {
     internal class OrdersService : IOrdersService
     {
         private OrrnrrContext OrrnrrContext { get; }
-        public OrdersService(OrrnrrContext context)
+        private ITransactionService TransactionService { get; }
+        public OrdersService(OrrnrrContext context, ITransactionService transactionService)
         {
             OrrnrrContext = context;
+            TransactionService = transactionService;
         }
 
         public TokenOrderHistory CreateLimitOrder(int userId, int tokenId, bool isBuyOrder, int price, int count)
@@ -29,25 +27,20 @@ namespace OrrnrrWebApi.Services
 
         private TokenOrderHistory CreateLimitSellOrder(int userId, int tokenId, int price, int count)
         {
-            var token = OrrnrrContext.Tokens
-                .Where(x => x.Id == tokenId)
-                .FirstOrDefault() ?? throw new BadRequestApiException("존재하지 않는 토큰은 주문할 수 없습니다.");
-
             using var transaction = OrrnrrContext.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
-            
-            var user = OrrnrrContext.Users
-                .Where(x => x.Id == userId)
-                .FirstOrDefault() ?? throw new BadRequestApiException("존재하지 않는 유저입니다.");
+
+            User user = OrrnrrContext.Users.GetUserById(userId) ?? throw new UnauthorizedApiExeption("유저 정보가 존재하지 않습니다.");
+            Token token = OrrnrrContext.Tokens.GetTokenById(tokenId) ?? throw new NotFoundApiException("토큰 정보가 존재하지 않습니다.");
 
             int numberOwned = OrrnrrContext.TokenHoldingsHistories
-                .Where(x => x.UserId == userId)
-                .Where(x => x.TokenId == tokenId)
+                .Where(x => x.User == user)
+                .Where(x => x.Token == token)
                 .Select(x => x.TokenCount)
                 .FirstOrDefault();
 
             var numberSell = OrrnrrContext.TokenOrderHistories
-                .Where(x => x.UserId == userId)
-                .Where(x => x.TokenId == tokenId)
+                .Where(x => x.User == user)
+                .Where(x => x.Token == token)
                 .Where(x => !x.IsBuyOrder)
                 .Where(x => x.OrderCount > x.CompleteCount)
                 .Where(x => !x.IsCanceled)
@@ -60,7 +53,10 @@ namespace OrrnrrWebApi.Services
 
             var newOrder = TokenOrderHistory.CreateSellOrder(user, token, price, count);
 
-            var existsOrders = OrrnrrContext.TokenOrderHistories.GetCanSellOrdersForLimit(token, price).ToArray();
+            var existsOrders = OrrnrrContext.TokenOrderHistories
+                .GetMatchingOrders(newOrder)
+                .ToArray();
+
             foreach (var existsOrder in existsOrders)
             {
                 if (newOrder.ExecutableCount == 0)
@@ -69,14 +65,7 @@ namespace OrrnrrWebApi.Services
                 }
 
                 int signedPrice = existsOrder.OrderPrice!.Value;
-
-                (int transactionCount, TradeActionType tradeActionType) = newOrder.Sign(existsOrder, signedPrice);
-
-                var tradeAction = OrrnrrContext.TradeActions
-                    .Where(x => x.Name == tradeActionType.GetActionName())
-                    .First();
-
-                var newTrade = new TransactionHistory(existsOrder, newOrder, tradeAction, transactionCount, signedPrice);
+                TransactionHistory newTrade = TransactionService.CreateTransactionHistory(newOrder, existsOrder, signedPrice);
                 OrrnrrContext.TransactionHistories.Add(newTrade);
             }
 
@@ -89,19 +78,13 @@ namespace OrrnrrWebApi.Services
 
         private TokenOrderHistory CreateLimitBuyOrder(int userId, int tokenId, int price, int count)
         {
-            var token = OrrnrrContext.Tokens
-                .Where(x => x.Id == tokenId)
-                .FirstOrDefault() ?? throw new NotFoundApiException("토큰 정보가 존재하지 않습니다.");
-
             using var transaction = OrrnrrContext.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
 
-            var user = OrrnrrContext.Users
-                .Where(x => x.Id == userId)
-                .FirstOrDefault() ?? throw new UnauthorizedApiExeption("유저 정보가 존재하지 않습니다.");
+            User user = OrrnrrContext.Users.GetUserById(userId) ?? throw new UnauthorizedApiExeption("유저 정보가 존재하지 않습니다.");
+            Token token = OrrnrrContext.Tokens.GetTokenById(tokenId) ?? throw new NotFoundApiException("토큰 정보가 존재하지 않습니다.");
 
             int existsBuyPayment = OrrnrrContext.TokenOrderHistories
                 .Where(x => x.User == user)
-                .Where(x => x.Token == token)
                 .Where(x => !x.IsCanceled)
                 .Where(x => x.IsBuyOrder)
                 .Where(x => x.OrderCount > x.CompleteCount)
@@ -115,7 +98,9 @@ namespace OrrnrrWebApi.Services
 
             var newOrder = TokenOrderHistory.CreateBuyOrder(user, token, price, count);
 
-            var existsOrders = OrrnrrContext.TokenOrderHistories.GetCanBuyOrdersForLimit(token, price).ToArray();
+            var existsOrders = OrrnrrContext.TokenOrderHistories
+                .GetMatchingOrders(newOrder)
+                .ToArray();
 
             foreach (var existsOrder in existsOrders)
             {
@@ -125,13 +110,7 @@ namespace OrrnrrWebApi.Services
                 }
 
                 int signedPrice = existsOrder.OrderPrice!.Value;
-                (int transactionCount, TradeActionType tradeActionType) = newOrder.Sign(existsOrder, signedPrice);
-
-                var tradeAction = OrrnrrContext.TradeActions
-                    .Where(x => x.Name == tradeActionType.GetActionName())
-                    .First();
-
-                var newTrade = new TransactionHistory(newOrder, existsOrder, tradeAction, transactionCount, signedPrice);
+                TransactionHistory newTrade = TransactionService.CreateTransactionHistory(newOrder, existsOrder, signedPrice);
                 OrrnrrContext.TransactionHistories.Add(newTrade);
             }
 
@@ -146,13 +125,8 @@ namespace OrrnrrWebApi.Services
         {
             using var transaction = OrrnrrContext.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
 
-            var user = OrrnrrContext.Users
-                .Where(user => user.Id == userId)
-                .FirstOrDefault() ?? throw new UnauthorizedApiExeption("유저 정보가 존재하지 않습니다.");
-
-            var token = OrrnrrContext.Tokens
-                .Where(token => token.Id == tokenId)
-                .FirstOrDefault() ?? throw new NotFoundApiException("토큰 정보가 존재하지 않습니다.");
+            User user = OrrnrrContext.Users.GetUserById(userId) ?? throw new UnauthorizedApiExeption("유저 정보가 존재하지 않습니다.");
+            Token token = OrrnrrContext.Tokens.GetTokenById(tokenId) ?? throw new NotFoundApiException("토큰 정보가 존재하지 않습니다.");
 
             var newOrder = new TokenOrderHistory(user, token, isBuyOrder, count);
 
@@ -160,18 +134,65 @@ namespace OrrnrrWebApi.Services
                 .GetMatchingOrders(newOrder)
                 .ToArray();
 
-            foreach(var matchedOrder in matchedOrders)
+            foreach (var matchedOrder in matchedOrders)
             {
+                if (newOrder.ExecutableCount == 0)
+                {
+                    break;
+                }
+
                 int signedPrice = matchedOrder.OrderPrice!.Value;
-
-                (int tradeCount, TradeActionType tradeActionType) = newOrder.Sign(matchedOrder, signedPrice);
-
-                var tradeAction = OrrnrrContext.TradeActions
-                    .Where(x => x.Name == tradeActionType.GetActionName())
-                    .First();
-
-                var newTrade = new TransactionHistory(newOrder, matchedOrder, tradeAction, tradeCount, signedPrice);
+                TransactionHistory newTransactionHistory = TransactionService.CreateTransactionHistory(newOrder, matchedOrder, signedPrice);
+                OrrnrrContext.TransactionHistories.Add(newTransactionHistory);
             }
+
+            OrrnrrContext.TokenOrderHistories.Add(newOrder);
+            OrrnrrContext.SaveChanges();
+            transaction.Commit();
+
+            return newOrder;
+        }
+
+        public Result<TokenOrderHistory> CreateMarketOrder(int userId, int tokenId, bool isBuyOrder, int count)
+        {
+            using var transaction = OrrnrrContext.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
+
+
+            var user = OrrnrrContext.Users.GetUserById(userId);
+            if (user is null)
+            {
+                return ErrorCode.NotFoundUser.GetResult<TokenOrderHistory>();
+            }
+
+            var token = OrrnrrContext.Tokens.GetTokenById(tokenId);
+            if (token is null)
+            {
+                return new Result<TokenOrderHistory>("토큰 정보가 존재하지 않습니다.", ErrorCode.NotFoundToken);
+            }
+
+            TokenOrderHistory newOrder = new TokenOrderHistory(user, token, isBuyOrder, count);
+
+            var matchedOrders = OrrnrrContext.TokenOrderHistories
+                .GetMatchingOrders(newOrder)
+                .ToArray();
+
+            foreach (var matchedOrder in matchedOrders)
+            {
+                if (newOrder.ExecutableCount == 0)
+                {
+                    break;
+                }
+
+                int signedPrice = matchedOrder.OrderPrice!.Value;
+                TransactionHistory newTransactionHistory = TransactionService.CreateTransactionHistory(newOrder, matchedOrder, signedPrice);
+                OrrnrrContext.TransactionHistories.Add(newTransactionHistory);
+            }
+
+            OrrnrrContext.TokenOrderHistories.Add(newOrder);
+            OrrnrrContext.SaveChanges();
+            transaction.Commit();
+
+            return new Result<TokenOrderHistory>(newOrder);
         }
     }
 }

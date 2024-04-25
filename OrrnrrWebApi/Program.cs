@@ -31,8 +31,8 @@ namespace OrrnrrWebApi
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<ITokenSourceService, TokenSourceService>();
             builder.Services.AddScoped<IOrdersService, OrdersService>();
-            //builder.Services.AddScoped<JwtProvider>();
-
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<ITransactionService, TransactionService>();
             builder.Services.AddScoped(x => ContextManager.Instance.OrrnrrContext);
 
             var app = builder.Build();
