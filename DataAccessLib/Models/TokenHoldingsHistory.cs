@@ -6,6 +6,24 @@ namespace DataAccessLib.Models;
 public partial class TokenHoldingsHistory
 {
     public TokenHoldingsHistory() { }
+
+    public TokenHoldingsHistory(User user, Token token)
+        : this(user, token, 0, 0.0, 0, 0)
+    {
+    }
+
+    public TokenHoldingsHistory(User user, Token token, int tokenCount, double averageBuyPrice, int maxBuyPrice, int minBuyPrice)
+    {
+        UserId = user.Id;
+        TokenId = token.Id;
+        TokenCount = tokenCount;
+        AverageBuyPrice = averageBuyPrice;
+        MaxBuyPrice = maxBuyPrice;
+        MinBuyPrice = minBuyPrice;
+        Token = token;
+        User = user;
+    }
+
     public int Id { get; set; }
 
     public int UserId { get; set; }
@@ -25,4 +43,11 @@ public partial class TokenHoldingsHistory
     public virtual Token Token { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;
+
+    public TokenHoldingsHistory Copy()
+    {
+        var copy = new TokenHoldingsHistory(User, Token, TokenCount, AverageBuyPrice, MaxBuyPrice, MinBuyPrice);
+
+        return copy;
+    }
 }

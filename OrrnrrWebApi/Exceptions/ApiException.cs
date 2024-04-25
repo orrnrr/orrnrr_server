@@ -5,6 +5,11 @@ namespace OrrnrrWebApi.Exceptions
 {
     public class ApiException(HttpStatusCode statusCode, string message, object? content = null) : Exception(message)
     {
+        public ApiException(HttpStatusCode statusCode, ErrorCode errorCode)
+            : this(statusCode, errorCode.GetMessage(), errorCode.GetCode())
+        {
+        }
+
         public HttpStatusCode StatusCode { get; } = statusCode;
         public object? Content { get; } = content;
     }
@@ -42,7 +47,12 @@ namespace OrrnrrWebApi.Exceptions
     public class NotFoundApiException(string message, object? content = null)
         : ApiException(HttpStatusCode.NotFound, message, content)
     {
+        public NotFoundApiException(ErrorCode errorCode)
+            : this(errorCode.GetMessage(), errorCode.GetCode())
+        {
+        }
     }
+
 
     internal static class ExceptionExtentions
     {

@@ -1,29 +1,38 @@
 ﻿using DataAccessLib.Models;
+using Microsoft.EntityFrameworkCore;
 using OrrnrrWebApi.Exceptions;
 using OrrnrrWebApi.Repositories;
+using System.Data;
 
 namespace OrrnrrWebApi.Services
 {
     public class TransactionService : ITransactionService
     {
-        public TransactionService(OrrnrrContext context)
+        public TransactionService(OrrnrrContext context, ITokenHoldingHistoryService tokenHoldingHistoryService)
         {
             OrrnrrContext = context;
+            TokenHoldingHistoryService = tokenHoldingHistoryService;
         }
 
         private OrrnrrContext OrrnrrContext { get; }
-        
+        private ITokenHoldingHistoryService TokenHoldingHistoryService { get; }
+
+
         public Result<TransactionHistory> CreateTransactionHistory(TokenOrderHistory order1, TokenOrderHistory order2, int signedPrice)
         {
+            using var transaction = OrrnrrContext.Database.BeginTransaction(IsolationLevel.Serializable);
+
             var buyOrder = order1.IsBuyOrder ? order1 : order2;
             var sellOrder = order1.IsBuyOrder ? order2 : order1;
-
-            var buyer = buyOrder.User;
-            var seller = sellOrder.User;
 
             if (buyOrder.IsCanceled || sellOrder.IsCanceled)
             {
                 throw new InvalidOperationException("거래를 성사시키지 못했습니다. 취소된 주문이 포함되어 있습니다.");
+            }
+
+            if (buyOrder.Token.Id != sellOrder.Token.Id)
+            {
+                throw new InvalidOperationException("거래를 성사시키지 못했습니다. 서로 다른 토큰에 대한 주문입니다.");
             }
 
             if (buyOrder.IsBuyOrder == sellOrder.IsBuyOrder)
@@ -40,22 +49,13 @@ namespace OrrnrrWebApi.Services
 
             int payment = signedPrice * tradeCount;
 
-            bool successToPay = buyer.TryPayTo(seller, payment);
+            bool successToPay = buyOrder.User.TryPayTo(sellOrder.User, payment);
             if (!successToPay)
             {
-                return new Result<TransactionHistory>(ErrorCode.InsufficientBalance);
+                return new Result<TransactionHistory>(ErrorCode.HaveNotEnoughBalance);
             }
 
-#error 여기서부터 다시 작성
-            OrrnrrContext.TokenHoldingsHistories.GetTokenHoldingHistory(buyer);
-
-            Result<(int, TradeActionType)> signResult = order1.Sign(order2, signedPrice);
-            if (signResult.IsError)
-            {
-                return new Result<TransactionHistory>(signResult.Error);
-            }
-
-            (int tradeCount, TradeActionType tradeActionType) = signResult.Value;
+            TokenHoldingHistoryService.TradeToken(buyOrder.User, sellOrder.User, buyOrder.Token, signedPrice, tradeCount); 
 
             TradeAction tradeAction = OrrnrrContext.TradeActions.GetTradeAction(tradeActionType) ?? throw new InvalidOperationException("trada_action이 존재하지 않습니다.");
 
