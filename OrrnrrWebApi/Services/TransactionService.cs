@@ -55,7 +55,8 @@ namespace OrrnrrWebApi.Services
                 return new Result<TransactionHistory>(ErrorCode.HaveNotEnoughBalance);
             }
 
-            TokenHoldingHistoryService.TradeToken(buyOrder.User, sellOrder.User, buyOrder.Token, signedPrice, tradeCount); 
+            TokenHoldingHistoryService.TradeToken(buyOrder.User, sellOrder.User, buyOrder.Token, signedPrice, tradeCount);
+
 
             TradeAction tradeAction = OrrnrrContext.TradeActions.GetTradeAction(tradeActionType) ?? throw new InvalidOperationException("trada_action이 존재하지 않습니다.");
 
