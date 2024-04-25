@@ -1,4 +1,5 @@
 ﻿using DataAccessLib.Models;
+using OrrnrrWebApi.Exceptions;
 
 namespace OrrnrrWebApi.Services
 {
@@ -11,6 +12,7 @@ namespace OrrnrrWebApi.Services
         /// <param name="matchedOrder"></param>
         /// <param name="signedPrice"></param>
         /// <returns></returns>
-        TransactionHistory CreateTransactionHistory(TokenOrderHistory order1, TokenOrderHistory order2, int signedPrice);
+        //TransactionHistory CreateTransactionHistory(TokenOrderHistory order1, TokenOrderHistory order2, int signedPrice);
+        Result<TransactionHistory> CreateTransactionHistory(TokenOrderHistory order1, TokenOrderHistory order2, int signedPrice);
     }
 }

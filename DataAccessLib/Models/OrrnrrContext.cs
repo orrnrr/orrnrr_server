@@ -127,6 +127,20 @@ public partial class OrrnrrContext : DbContext
                 .HasConstraintName("fk_user");
         });
 
+        modelBuilder.Entity<OrderType>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("order_type_pkey");
+
+            entity.ToTable("order_type");
+
+            entity.HasIndex(e => e.Name, "unq_order_type_name").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .HasColumnName("name");
+        });
+
         modelBuilder.Entity<Token>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("token_pkey");
@@ -192,6 +206,7 @@ public partial class OrrnrrContext : DbContext
             entity.Property(e => e.OrderPrice).HasColumnName("order_price");
             entity.Property(e => e.TokenId).HasColumnName("token_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.OrderTypeId).HasColumnName("order_type_id");
 
             entity.HasOne(d => d.Token).WithMany()
                 .HasForeignKey(d => d.TokenId)
@@ -200,6 +215,10 @@ public partial class OrrnrrContext : DbContext
             entity.HasOne(d => d.User).WithMany()
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("fk_user");
+
+            entity.HasOne(d => d.OrderType).WithMany()
+                .HasForeignKey(d => d.OrderTypeId)
+                .HasConstraintName("fk_order_type");
         });
 
         modelBuilder.Entity<TokenSource>(entity =>

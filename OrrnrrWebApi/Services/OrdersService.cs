@@ -157,17 +157,16 @@ namespace OrrnrrWebApi.Services
         {
             using var transaction = OrrnrrContext.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
 
-
             var user = OrrnrrContext.Users.GetUserById(userId);
             if (user is null)
             {
-                return ErrorCode.NotFoundUser.GetResult<TokenOrderHistory>();
+                return new Result<TokenOrderHistory>(ErrorCode.NotFoundUser);
             }
 
             var token = OrrnrrContext.Tokens.GetTokenById(tokenId);
             if (token is null)
             {
-                return new Result<TokenOrderHistory>("토큰 정보가 존재하지 않습니다.", ErrorCode.NotFoundToken);
+                return new Result<TokenOrderHistory>(ErrorCode.NotFoundToken);
             }
 
             TokenOrderHistory newOrder = new TokenOrderHistory(user, token, isBuyOrder, count);
@@ -184,8 +183,13 @@ namespace OrrnrrWebApi.Services
                 }
 
                 int signedPrice = matchedOrder.OrderPrice!.Value;
-                TransactionHistory newTransactionHistory = TransactionService.CreateTransactionHistory(newOrder, matchedOrder, signedPrice);
-                OrrnrrContext.TransactionHistories.Add(newTransactionHistory);
+                
+                Result<TransactionHistory> tradeResult = TransactionService.CreateTransactionHistory(newOrder, matchedOrder, signedPrice);
+                if (tradeResult.IsError) {
+                    return new Result<TokenOrderHistory>(tradeResult.Error);
+                }
+
+                OrrnrrContext.TransactionHistories.Add(tradeResult.Value);
             }
 
             OrrnrrContext.TokenOrderHistories.Add(newOrder);

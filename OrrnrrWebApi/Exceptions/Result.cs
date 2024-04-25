@@ -16,7 +16,7 @@
 
         public Result(ErrorCode errorCode)
         {
-            _error = errorCode.GetError();
+            _error = new Error(errorCode);
         }
 
         public Result(Error error)
@@ -27,6 +27,7 @@
         public TValue Value { get => _value ?? throw new NullReferenceException(); }
         public Error Error { get => _error ?? throw new NullReferenceException(); }
         public bool IsSuccess { get => _value != null; }
+        public bool IsError { get => _error != null; }
 
     }
 

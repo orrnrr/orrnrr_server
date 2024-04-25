@@ -1,4 +1,5 @@
-﻿using OrrnrrWebApi.Exceptions;
+﻿using DataAccessLib.Models;
+using OrrnrrWebApi.Exceptions;
 using OrrnrrWebApi.Types;
 using System.Text.Json.Serialization;
 
@@ -29,7 +30,7 @@ namespace OrrnrrWebApi.Requests
                 throw new BadRequestApiException("주문 유형을 지정하지 않았습니다.");
             }
 
-            if (!Enum.TryParse(OrderType, true, out OrderType orderType))
+            if (!Enum.TryParse(OrderType, true, out OrderCategory orderType))
             {
                 throw new BadRequestApiException("존재하지 않는 주문 유형입니다.");
             }
@@ -49,7 +50,7 @@ namespace OrrnrrWebApi.Requests
                 throw new BadRequestApiException("주문 개수는 0이하일 수 없습니다.");
             }
 
-            if (orderType != Types.OrderType.Market)
+            if (orderType != OrderCategory.Market)
             {
                 if (Price is null)
                 {

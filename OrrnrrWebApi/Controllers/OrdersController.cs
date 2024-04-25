@@ -32,13 +32,13 @@ namespace OrrnrrWebApi.Controllers
         [Consumes("application/x-www-form-urlencoded")]
         public IActionResult CreateOrder([FromForm] int? tokenId, [FromForm] string? orderType, [FromForm] bool? isBuyOrder, [FromForm] int? price, [FromForm] int? count)
         {
-            var isValidOrderType = Enum.TryParse(orderType ?? throw new BadRequestApiException($"{nameof(orderType)}은 null일 수 없습니다."), true, out OrderType validOrderType);
+            var isValidOrderType = Enum.TryParse(orderType ?? throw new BadRequestApiException($"{nameof(orderType)}은 null일 수 없습니다."), true, out OrderCategory validOrderType);
             if (!isValidOrderType)
             {
-                throw OrderTypeExtensions.CreateValidRangeApiException(nameof(orderType));
+                throw new BadRequestApiException($"{nameof(orderType)}의 값이 유효하지 않습니다.");
             }
 
-            if (validOrderType != OrderType.Market)
+            if (validOrderType != OrderCategory.Market)
             {
                 if ((price ?? throw new NullParameterApiException(nameof(price))) <= 0)
                 {
@@ -53,20 +53,21 @@ namespace OrrnrrWebApi.Controllers
 
             TokenOrderHistory createdTokenOrderHistory = validOrderType switch
             {
-                OrderType.Market => OrdersService.CreateMarketOrder(
+                OrderCategory.Market => OrdersService.CreateMarketOrder(
                         userId: AuthUtil.GetUserId(HttpContext.User)
                         , tokenId: tokenId ?? throw new NullParameterApiException(nameof(tokenId))
                         , isBuyOrder: isBuyOrder ?? throw new NullParameterApiException(nameof(isBuyOrder))
                         , count: count.Value
                     ),
-                OrderType.Limit => OrdersService.CreateLimitOrder(
+                OrderCategory.Limit => OrdersService.CreateLimitOrder(
                         userId: AuthUtil.GetUserId(HttpContext.User)
                         , tokenId: tokenId ?? throw new NullParameterApiException(nameof(tokenId))
                         , isBuyOrder: isBuyOrder ?? throw new NullParameterApiException(nameof(isBuyOrder))
                         , price: price!.Value
                         , count: count.Value
                     ),
-                _ => throw OrderTypeExtensions.CreateValidRangeApiException(nameof(orderType))
+                    OrderCategory.Reservation => throw new NotImplementedException("예약 주문 기능은 아직 구현되지 않았습니다."),
+                _ => throw new BadRequestApiException($"{nameof(orderType)}의 값이 유효하지 않습니다.")
             };
 
             return Created("/orders", TokenOrderHistoryResponse.From(createdTokenOrderHistory));

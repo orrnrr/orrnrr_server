@@ -25,6 +25,8 @@ public partial class TokenOrderHistory
 
     public int TokenId { get; set; }
 
+    public byte OrderTypeId { get; set; }
+
     public bool IsBuyOrder { get; set; }
 
     public int? OrderPrice { get; set; } = null!;
@@ -40,6 +42,8 @@ public partial class TokenOrderHistory
     public virtual Token Token { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;
+
+    public virtual OrderType OrderType { get; set; } = null!;
 
     //public virtual ICollection<TransactionHistory> TransactionHistoryBuyOrders { get; set; } = new List<TransactionHistory>();
 
@@ -83,7 +87,7 @@ public partial class TokenOrderHistory
         var buyOrder = IsBuyOrder ? this : other;
         var sellOrder = IsBuyOrder ? other : this;
 
-        buyOrder.User.PayTo(sellOrder.User, payment);
+        buyOrder.User.TryPayTo(sellOrder.User, payment);
 
         if (ExecutableCount > 0 && other.ExecutableCount > 0)
         {
