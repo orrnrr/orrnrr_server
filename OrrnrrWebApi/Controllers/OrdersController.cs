@@ -66,11 +66,14 @@ namespace OrrnrrWebApi.Controllers
                         , price: price!.Value
                         , count: count.Value
                     ),
-                    OrderCategory.Reservation => throw new NotImplementedException("예약 주문 기능은 아직 구현되지 않았습니다."),
+                OrderCategory.Reservation => throw new NotImplementedException("예약 주문 기능은 아직 구현되지 않았습니다."),
                 _ => throw new BadRequestApiException($"{nameof(orderType)}의 값이 유효하지 않습니다.")
             };
 
             return Created("/orders", TokenOrderHistoryResponse.From(createdTokenOrderHistory));
         }
+
+        public IActionResult CreateOrder([FromBody])
+
     }
 }
